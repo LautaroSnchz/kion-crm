@@ -6,10 +6,24 @@ import {
   Plus,
   DollarSign,
   Calendar,
-  User,
   X,
-  TrendingUp
+  TrendingUp,
+  GripVertical
 } from "lucide-react";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -61,7 +75,7 @@ interface Deal {
 }
 
 // Data fake
-const FAKE_DEALS: Deal[] = [
+const INITIAL_DEALS: Deal[] = [
   {
     id: "1",
     title: "Migración Cloud Platform",
@@ -143,10 +157,161 @@ const PRIORITY_LABELS = {
   low: { label: "Baja", dot: "bg-green-500" },
 };
 
+// Componente de Deal Card con drag
+function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
+  const priority = PRIORITY_LABELS[deal.priority];
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: deal.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Card 
+        className="p-3 cursor-pointer hover:shadow-md transition-all group relative"
+        onClick={onClick}
+      >
+        {/* Drag handle */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="w-4 h-4 text-[var(--muted-foreground)]" />
+        </div>
+
+        <div className="pl-3">
+          {/* Header: Prioridad + Avatar */}
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
+              <span className="text-xs text-[var(--muted-foreground)]">{priority.label}</span>
+            </div>
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-semibold">
+              {deal.ownerAvatar}
+            </div>
+          </div>
+
+          {/* Cliente */}
+          <p className="text-xs text-[var(--muted-foreground)] mb-1">{deal.client}</p>
+          
+          {/* Título del deal */}
+          <h4 className="font-semibold text-sm text-[var(--foreground)] mb-3 group-hover:text-[var(--primary)] transition-colors line-clamp-2">
+            {deal.title}
+          </h4>
+
+          {/* Footer: Valor + Fecha */}
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1 text-[var(--foreground)] font-semibold">
+              <DollarSign className="w-3 h-3" />
+              {(deal.value / 1000).toFixed(0)}K
+            </div>
+            <div className="flex items-center gap-1 text-[var(--muted-foreground)]">
+              <Calendar className="w-3 h-3" />
+              {new Date(deal.closeDate).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 export default function ProjectsPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
-  const [deals] = useState<Deal[]>(FAKE_DEALS);
+  const [deals, setDeals] = useState<Deal[]>(INITIAL_DEALS);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  const handleDragStart = (event: any) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragOver = (event: any) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    // Si se arrastra sobre una columna directamente
+    const overStage = STAGES.find(s => s.id === overId);
+    if (overStage) {
+      setDeals(prevDeals => 
+        prevDeals.map(deal => 
+          deal.id === activeId 
+            ? { ...deal, stage: overStage.id as Stage }
+            : deal
+        )
+      );
+      return;
+    }
+
+    // Si se arrastra sobre otro deal, cambiar a la columna de ese deal
+    const overDeal = deals.find(d => d.id === overId);
+    if (overDeal) {
+      setDeals(prevDeals =>
+        prevDeals.map(deal =>
+          deal.id === activeId
+            ? { ...deal, stage: overDeal.stage }
+            : deal
+        )
+      );
+    }
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    
+    if (over) {
+      const activeId = active.id;
+      const overId = over.id;
+
+      // Confirmar el cambio final
+      const overStage = STAGES.find(s => s.id === overId);
+      if (overStage) {
+        setDeals(prevDeals =>
+          prevDeals.map(deal =>
+            deal.id === activeId
+              ? { ...deal, stage: overStage.id as Stage }
+              : deal
+          )
+        );
+      }
+
+      const overDeal = deals.find(d => d.id === overId);
+      if (overDeal) {
+        setDeals(prevDeals =>
+          prevDeals.map(deal =>
+            deal.id === activeId
+              ? { ...deal, stage: overDeal.stage }
+              : deal
+          )
+        );
+      }
+    }
+
+    setActiveId(null);
+  };
 
   // Agrupar deals por stage
   const dealsByStage = STAGES.map(stage => ({
@@ -157,47 +322,7 @@ export default function ProjectsPage() {
       .reduce((sum, d) => sum + d.value, 0)
   }));
 
-  const DealCard = ({ deal }: { deal: Deal }) => {
-    const priority = PRIORITY_LABELS[deal.priority];
-    
-    return (
-      <Card 
-        className="p-3 cursor-pointer hover:shadow-md transition-all group"
-        onClick={() => setSelectedDeal(deal)}
-      >
-        {/* Header: Prioridad + Avatar */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
-            <span className="text-xs text-[var(--muted-foreground)]">{priority.label}</span>
-          </div>
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-semibold">
-            {deal.ownerAvatar}
-          </div>
-        </div>
-
-        {/* Cliente */}
-        <p className="text-xs text-[var(--muted-foreground)] mb-1">{deal.client}</p>
-        
-        {/* Título del deal */}
-        <h4 className="font-semibold text-sm text-[var(--foreground)] mb-3 group-hover:text-[var(--primary)] transition-colors line-clamp-2">
-          {deal.title}
-        </h4>
-
-        {/* Footer: Valor + Fecha */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1 text-[var(--foreground)] font-semibold">
-            <DollarSign className="w-3 h-3" />
-            {(deal.value / 1000).toFixed(0)}K
-          </div>
-          <div className="flex items-center gap-1 text-[var(--muted-foreground)]">
-            <Calendar className="w-3 h-3" />
-            {new Date(deal.closeDate).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
-          </div>
-        </div>
-      </Card>
-    );
-  };
+  const activeDeal = activeId ? deals.find(d => d.id === activeId) : null;
 
   return (
     <div className="p-6 space-y-6 bg-[var(--background)] min-h-screen">
@@ -242,44 +367,74 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Vista Kanban */}
+      {/* Vista Kanban con Drag & Drop */}
       {view === "kanban" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {dealsByStage.map((stage) => (
-            <div key={stage.id} className="flex flex-col">
-              
-              {/* Header de columna */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-2 h-2 rounded-full ${stage.color}`} />
-                  <h3 className="font-semibold text-[var(--foreground)]">{stage.name}</h3>
-                  <span className="text-sm text-[var(--muted-foreground)]">
-                    ({stage.deals.length})
-                  </span>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {dealsByStage.map((stage) => (
+              <div key={stage.id} className="flex flex-col">
+                
+                {/* Header de columna - droppable zone */}
+                <div 
+                  className="mb-4 p-3 rounded-lg border-2 border-dashed border-transparent hover:border-[var(--border)] transition-colors"
+                  style={{ minHeight: '60px' }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={`w-2 h-2 rounded-full ${stage.color}`} />
+                    <h3 className="font-semibold text-[var(--foreground)]">{stage.name}</h3>
+                    <span className="text-sm text-[var(--muted-foreground)]">
+                      ({stage.deals.length})
+                    </span>
+                  </div>
+                  <p className="text-sm text-[var(--muted-foreground)] flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    ${(stage.totalValue / 1000).toFixed(0)}K
+                  </p>
                 </div>
-                <p className="text-sm text-[var(--muted-foreground)] flex items-center gap-1">
-                  <TrendingUp className="w-3 h-3" />
-                  ${(stage.totalValue / 1000).toFixed(0)}K
-                </p>
-              </div>
 
-              {/* Cards de deals */}
-              <div className="space-y-3 flex-1">
-                {stage.deals.length === 0 ? (
-                  <Card className="p-6 text-center border-dashed">
-                    <p className="text-sm text-[var(--muted-foreground)]">
-                      No hay deals en esta etapa
-                    </p>
-                  </Card>
-                ) : (
-                  stage.deals.map(deal => (
-                    <DealCard key={deal.id} deal={deal} />
-                  ))
-                )}
+                {/* Cards de deals */}
+                <SortableContext
+                  items={stage.deals.map(d => d.id)}
+                  strategy={verticalListSortingStrategy}
+                  id={stage.id}
+                >
+                  <div className="space-y-3 flex-1">
+                    {stage.deals.length === 0 ? (
+                      <Card className="p-6 text-center border-dashed">
+                        <p className="text-sm text-[var(--muted-foreground)]">
+                          Arrastrá deals aquí
+                        </p>
+                      </Card>
+                    ) : (
+                      stage.deals.map(deal => (
+                        <DraggableDealCard 
+                          key={deal.id} 
+                          deal={deal}
+                          onClick={() => setSelectedDeal(deal)}
+                        />
+                      ))
+                    )}
+                  </div>
+                </SortableContext>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Drag overlay */}
+          <DragOverlay>
+            {activeDeal ? (
+              <Card className="p-3 opacity-90 rotate-3 shadow-xl">
+                <p className="font-semibold text-sm">{activeDeal.title}</p>
+              </Card>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* Vista Lista */}

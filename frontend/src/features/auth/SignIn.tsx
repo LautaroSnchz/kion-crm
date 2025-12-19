@@ -1,69 +1,204 @@
-import { useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { AlertCircle, Sun, Moon } from "lucide-react";
 
 export default function SignIn() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login, loginAsDemo } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Aquí va tu lógica de login real
-    // Por ahora simulamos un login exitoso
-    const fakeToken = btoa(JSON.stringify({ email, id: "123" }));
-    localStorage.setItem("kion.auth", JSON.stringify({ token: fakeToken }));
-    
-    navigate("/");
+  /* ================= THEME (LOCAL, SIN useTheme) ================= */
+  const [isDark, setIsDark] = useState(() =>
+    document.documentElement.classList.contains("dark")
+  );
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+      setIsDark(true);
+    }
+
+    if (savedTheme === "light") {
+      document.documentElement.classList.remove("dark");
+      setIsDark(false);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !isDark;
+    setIsDark(next);
+
+    if (next) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
   };
 
+  /* ================= FORM STATE ================= */
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  /* ================= HANDLERS ================= */
+  const handleDemoAccess = () => {
+    setLoading(true);
+    loginAsDemo();
+
+    setTimeout(() => {
+      navigate("/");
+    }, 300);
+  };
+
+  const handleAdminLogin = (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const success = login(email, password);
+
+    if (success) {
+      setTimeout(() => {
+        navigate("/");
+      }, 300);
+    } else {
+      setError("Credenciales inválidas");
+      setLoading(false);
+    }
+  };
+
+  /* ================= RENDER ================= */
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">
-            Sign in to KionCRM
-          </h2>
+    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-4">
+      {/* Toggle theme */}
+      <button
+        onClick={toggleTheme}
+        className="fixed top-4 right-4 p-2 rounded-lg bg-[var(--muted)] hover:bg-[var(--muted)]/80 transition-colors"
+      >
+        {isDark ? (
+          <Sun className="w-5 h-5 text-[var(--foreground)]" />
+        ) : (
+          <Moon className="w-5 h-5 text-[var(--foreground)]" />
+        )}
+      </button>
+
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mb-4">
+            <img
+              src="/logo-light.png"
+              alt="Kion CRM"
+              className="w-16 h-16 dark:hidden"
+            />
+            <img
+              src="/logo-dark.png"
+              alt="Kion CRM"
+              className="w-16 h-16 hidden dark:block"
+            />
+          </div>
+          <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
+            KionCRM
+          </h1>
+          <p className="text-[var(--muted-foreground)]">
+            Customer Relationship Management
+          </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="tu@email.com"
-              />
+
+        {/* Card */}
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg p-8 space-y-6">
+          {/* Demo */}
+          <button
+            onClick={handleDemoAccess}
+            disabled={loading}
+            className="w-full btn-kion h-12 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Cargando...
+              </>
+            ) : (
+              <>🚀 Acceder como Demo</>
+            )}
+          </button>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[var(--border)]" />
             </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="••••••••"
-              />
+            <div className="relative flex justify-center text-sm">
+              <span className="px-3 bg-[var(--card)] text-[var(--muted-foreground)]">
+                o inicia sesión como Admin
+              </span>
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Sign in
-          </button>
-        </form>
+          {/* Form */}
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                required
+                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                required
+                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)]"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-4 py-2 bg-[var(--muted)] hover:bg-[var(--muted)]/80 rounded-md"
+            >
+              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+            </button>
+          </form>
+
+          {/* Credenciales */}
+          <div className="pt-4 border-t border-[var(--border)] text-xs text-center text-[var(--muted-foreground)]">
+            <p className="mb-2">💡 Credenciales de prueba</p>
+            <p className="font-mono">
+              Admin: admin@kioncrm.com / Admin123!
+            </p>
+            <p className="font-mono">Demo: botón superior</p>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-[var(--muted-foreground)] mt-6">
+          Portfolio project by Lautaro Sanchez
+        </p>
       </div>
     </div>
   );

@@ -1,20 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
-    <!-- evitar los flash si tengo modo dark -->
-    <script>
-  (() => {
-    const stored = localStorage.getItem("theme"); // "dark" | "light" | null
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = stored ? stored === "dark" : prefersDark;
-    document.documentElement.classList.toggle("dark", isDark);
-  })();
-</script>
-
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    
+    <!-- SEO Básico -->
+    <meta name="description" content="KionCRM - Customer Relationship Management moderno y profesional" />
+    <meta name="author" content="Lautaro Sanchez" />
+    
+    <!-- Open Graph (LinkedIn preview) -->
+    <meta property="og:title" content="KionCRM" />
+    <meta property="og:description" content="Customer Relationship Management moderno" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.png" />
+    
+    <title>KionCRM</title>
   </head>
   <body>
     <div id="root"></div>

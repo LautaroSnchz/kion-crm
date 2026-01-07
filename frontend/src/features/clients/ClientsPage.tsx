@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Search, UserPlus, Mail, Phone, Building, TrendingUp, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, UserPlus, Mail, Phone, Building, X, ChevronLeft, ChevronRight } from "lucide-react";
+import NewClientModal from "@/components/modals/NewClientModal";
 
-// Componentes base
 const Card = ({ className = "", children }: any) => (
   <div className={`bg-[var(--card)] border border-[var(--border)] rounded-lg ${className}`}>
     {children}
@@ -41,8 +41,8 @@ const Badge = ({ children, variant = "default" }: any) => {
   );
 };
 
-// Data fake con más detalles
-const FAKE_CLIENTS = [
+// Data fake inicial
+const INITIAL_CLIENTS = [
   { 
     id: "1", 
     name: "Acme SA", 
@@ -109,10 +109,12 @@ export default function ClientsPage() {
   const [q, setQ] = useState("");
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [clients, setClients] = useState(INITIAL_CLIENTS);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   // Filtrado
-  const filteredData = FAKE_CLIENTS.filter(c => 
+  const filteredData = clients.filter(c => 
     c.name.toLowerCase().includes(q.toLowerCase()) ||
     c.email.toLowerCase().includes(q.toLowerCase()) ||
     c.company.toLowerCase().includes(q.toLowerCase())
@@ -123,6 +125,10 @@ export default function ClientsPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
+  const handleClientCreated = (newClient: any) => {
+    setClients(prev => [newClient, ...prev]);
+  };
+
   return (
     <div className="p-6 space-y-6 bg-[var(--background)]">
       
@@ -131,10 +137,14 @@ export default function ClientsPage() {
         <div>
           <h1 className="text-3xl font-bold text-[var(--foreground)]">Clientes</h1>
           <p className="text-[var(--muted-foreground)] mt-1">
-            Gestiona tu cartera de {FAKE_CLIENTS.length} clientes activos
+            Gestiona tu cartera de {clients.length} clientes activos
           </p>
         </div>
-        <Button variant="primary" className="flex items-center gap-2">
+        <Button 
+          variant="primary" 
+          className="flex items-center gap-2"
+          onClick={() => setIsModalOpen(true)}
+        >
           <UserPlus className="w-4 h-4" />
           Nuevo Cliente
         </Button>
@@ -359,6 +369,13 @@ export default function ClientsPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Nuevo Cliente */}
+      <NewClientModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onClientCreated={handleClientCreated}
+      />
 
     </div>
   );

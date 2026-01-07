@@ -24,6 +24,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { NewDealModal } from "@/components/modals";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -157,6 +158,21 @@ const PRIORITY_LABELS = {
   low: { label: "Baja", dot: "bg-green-500" },
 };
 
+// Helper para mapear prioridades del modal a las del kanban
+const PRIORITY_MAP: Record<string, Priority> = {
+  "Alta": "high",
+  "Media": "medium",
+  "Baja": "low"
+};
+
+// Helper para mapear stages del modal a las del kanban
+const STAGE_MAP: Record<string, Stage> = {
+  "Lead": "lead",
+  "Qualified": "qualified",
+  "Proposal": "proposal",
+  "Closed Won": "closed"
+};
+
 // Componente de Deal Card con drag
 function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
   const priority = PRIORITY_LABELS[deal.priority];
@@ -215,7 +231,7 @@ function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void 
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1 text-[var(--foreground)] font-semibold">
               <DollarSign className="w-3 h-3" />
-              {(deal.value / 1000).toFixed(0)}K
+              ${(deal.value / 1000).toFixed(0)}K
             </div>
             <div className="flex items-center gap-1 text-[var(--muted-foreground)]">
               <Calendar className="w-3 h-3" />
@@ -232,7 +248,8 @@ export default function ProjectsPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [deals, setDeals] = useState<Deal[]>(INITIAL_DEALS);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -242,78 +259,7 @@ export default function ProjectsPage() {
     })
   );
 
-  const handleDragStart = (event: any) => {
-    setActiveId(event.active.id);
-  };
-
-  const handleDragOver = (event: any) => {
-    const { active, over } = event;
-    if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    // Si se arrastra sobre una columna directamente
-    const overStage = STAGES.find(s => s.id === overId);
-    if (overStage) {
-      setDeals(prevDeals => 
-        prevDeals.map(deal => 
-          deal.id === activeId 
-            ? { ...deal, stage: overStage.id as Stage }
-            : deal
-        )
-      );
-      return;
-    }
-
-    // Si se arrastra sobre otro deal, cambiar a la columna de ese deal
-    const overDeal = deals.find(d => d.id === overId);
-    if (overDeal) {
-      setDeals(prevDeals =>
-        prevDeals.map(deal =>
-          deal.id === activeId
-            ? { ...deal, stage: overDeal.stage }
-            : deal
-        )
-      );
-    }
-  };
-
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-    
-    if (over) {
-      const activeId = active.id;
-      const overId = over.id;
-
-      // Confirmar el cambio final
-      const overStage = STAGES.find(s => s.id === overId);
-      if (overStage) {
-        setDeals(prevDeals =>
-          prevDeals.map(deal =>
-            deal.id === activeId
-              ? { ...deal, stage: overStage.id as Stage }
-              : deal
-          )
-        );
-      }
-
-      const overDeal = deals.find(d => d.id === overId);
-      if (overDeal) {
-        setDeals(prevDeals =>
-          prevDeals.map(deal =>
-            deal.id === activeId
-              ? { ...deal, stage: overDeal.stage }
-              : deal
-          )
-        );
-      }
-    }
-
-    setActiveId(null);
-  };
-
-  // Agrupar deals por stage
+  // Organizar deals por stage
   const dealsByStage = STAGES.map(stage => ({
     ...stage,
     deals: deals.filter(d => d.stage === stage.id),
@@ -322,45 +268,105 @@ export default function ProjectsPage() {
       .reduce((sum, d) => sum + d.value, 0)
   }));
 
-  const activeDeal = activeId ? deals.find(d => d.id === activeId) : null;
+  const totalValue = deals.reduce((sum, d) => sum + d.value, 0);
+
+  const handleDragStart = (event: any) => {
+    const deal = deals.find(d => d.id === event.active.id);
+    setActiveDeal(deal || null);
+  };
+
+  const handleDragOver = (event: any) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeDeal = deals.find(d => d.id === active.id);
+    if (!activeDeal) return;
+
+    // Buscar el stage sobre el que está el drag
+    const overStage = STAGES.find(s => 
+      deals.some(d => d.id === over.id && d.stage === s.id)
+    );
+
+    if (overStage && activeDeal.stage !== overStage.id) {
+      setDeals(prevDeals => 
+        prevDeals.map(d => 
+          d.id === active.id 
+            ? { ...d, stage: overStage.id as Stage }
+            : d
+        )
+      );
+    }
+  };
+
+  const handleDragEnd = () => {
+    setActiveDeal(null);
+  };
+
+  // Handler para crear nuevo deal desde el modal
+  const handleDealCreated = (newDealFromModal: any) => {
+    const newDeal: Deal = {
+      id: Date.now().toString(),
+      title: newDealFromModal.title,
+      client: newDealFromModal.client,
+      value: newDealFromModal.value,
+      closeDate: newDealFromModal.deadline,
+      priority: PRIORITY_MAP[newDealFromModal.priority] || "medium",
+      owner: newDealFromModal.assignee === "MG" ? "María G." : 
+             newDealFromModal.assignee === "JP" ? "Juan P." : "Ana S.",
+      ownerAvatar: newDealFromModal.assignee,
+      stage: STAGE_MAP[newDealFromModal.stage] || "lead"
+    };
+
+    setDeals(prev => [newDeal, ...prev]);
+  };
 
   return (
-    <div className="p-6 space-y-6 bg-[var(--background)] min-h-screen">
+    <div className="p-6 space-y-6 bg-[var(--background)]">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[var(--foreground)]">Pipeline de Ventas</h1>
           <p className="text-[var(--muted-foreground)] mt-1">
-            {deals.length} deals activos · ${(deals.reduce((sum, d) => sum + d.value, 0) / 1000).toFixed(0)}K total
+            {deals.length} deals activos · ${(totalValue / 1000).toFixed(0)}K total
           </p>
         </div>
-        
-        <div className="flex gap-2">
-          {/* Toggle de vista */}
-          <div className="flex border border-[var(--border)] rounded-lg p-1">
-            <Button
-              variant="ghost"
+
+        <div className="flex items-center gap-3">
+          {/* Toggle vista */}
+          <div className="flex items-center gap-1 p-1 bg-[var(--muted)] rounded-lg">
+            <button
               onClick={() => setView("kanban")}
-              className={view === "kanban" ? "bg-[var(--muted)]" : ""}
+              className={`p-2 rounded transition-colors ${
+                view === "kanban" 
+                  ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm" 
+                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              }`}
             >
               <LayoutGrid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
+            </button>
+            <button
               onClick={() => setView("list")}
-              className={view === "list" ? "bg-[var(--muted)]" : ""}
+              className={`p-2 rounded transition-colors ${
+                view === "list" 
+                  ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm" 
+                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              }`}
             >
               <List className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
-          
-          <Button variant="default" className="flex items-center gap-2">
+
+          <Button variant="ghost" className="flex items-center gap-2">
             <Filter className="w-4 h-4" />
             Filtros
           </Button>
           
-          <Button variant="primary" className="flex items-center gap-2">
+          <Button 
+            variant="primary" 
+            className="flex items-center gap-2"
+            onClick={() => setIsModalOpen(true)}
+          >
             <Plus className="w-4 h-4" />
             Nuevo Deal
           </Button>
@@ -568,6 +574,13 @@ export default function ProjectsPage() {
           </Card>
         </div>
       )}
+
+      {/* Modal Nuevo Deal */}
+      <NewDealModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onDealCreated={handleDealCreated}
+      />
 
     </div>
   );

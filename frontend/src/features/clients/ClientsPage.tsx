@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { Search, UserPlus, Mail, Phone, Building, X, ChevronLeft, ChevronRight } from "lucide-react";
-import NewClientModal from "@/components/modals/NewClientModal";
+import { Search, UserPlus, Mail, Phone, Building, X, ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import { NewClientModal } from "@/components/modals";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
+// Componentes base
 const Card = ({ className = "", children }: any) => (
   <div className={`bg-[var(--card)] border border-[var(--border)] rounded-lg ${className}`}>
     {children}
@@ -113,6 +116,10 @@ export default function ClientsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
+  // 🔑 Obtener usuario y rol
+  const { user } = useAuth();
+  const isDemo = user?.role === "demo";
+
   // Filtrado
   const filteredData = clients.filter(c => 
     c.name.toLowerCase().includes(q.toLowerCase()) ||
@@ -129,6 +136,29 @@ export default function ClientsPage() {
     setClients(prev => [newClient, ...prev]);
   };
 
+  // Handler para botón "Nuevo Cliente" con validación de demo
+  const handleNewClientClick = () => {
+    if (isDemo) {
+      toast.info("Demo Mode", {
+        description: "La creación de clientes está deshabilitada en modo demo"
+      });
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
+  // Handler para botón "Editar Cliente" con validación de demo
+  const handleEditClick = () => {
+    if (isDemo) {
+      toast.info("Demo Mode", {
+        description: "La edición de clientes está deshabilitada en modo demo"
+      });
+      return;
+    }
+    // Aquí iría la lógica de edición
+    toast.success("Función en desarrollo");
+  };
+
   return (
     <div className="p-6 space-y-6 bg-[var(--background)]">
       
@@ -140,14 +170,26 @@ export default function ClientsPage() {
             Gestiona tu cartera de {clients.length} clientes activos
           </p>
         </div>
-        <Button 
-          variant="primary" 
-          className="flex items-center gap-2"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <UserPlus className="w-4 h-4" />
-          Nuevo Cliente
-        </Button>
+        
+        {/* Botón con estado demo */}
+        <div className="relative group">
+          <Button 
+            variant="primary" 
+            className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
+            onClick={handleNewClientClick}
+          >
+            {isDemo ? <Lock className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+            Nuevo Cliente
+          </Button>
+          
+          {/* Tooltip para demo mode */}
+          {isDemo && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+              🔒 Deshabilitado en modo demo
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Card principal */}
@@ -177,6 +219,21 @@ export default function ClientsPage() {
 
         {/* Divider */}
         <div className="kion-divider mb-6" />
+
+        {/* Banner informativo para demo mode */}
+        {isDemo && (
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-3">
+            <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                Modo Demo Activo
+              </p>
+              <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                Estás navegando en modo solo lectura. Las funciones de creación y edición están deshabilitadas.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Tabla */}
         <div className="border border-[var(--border)] rounded-lg overflow-hidden">
@@ -355,11 +412,23 @@ export default function ClientsPage() {
                 </p>
               </div>
 
-              {/* Acciones */}
+              {/* Acciones con demo mode */}
               <div className="space-y-2 pt-4">
-                <Button variant="primary" className="w-full">
-                  Editar Cliente
-                </Button>
+                <div className="relative group">
+                  <Button 
+                    variant="primary" 
+                    className={`w-full ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    onClick={handleEditClick}
+                  >
+                    {isDemo && <Lock className="w-4 h-4 mr-2" />}
+                    Editar Cliente
+                  </Button>
+                  {isDemo && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      🔒 Deshabilitado en modo demo
+                    </div>
+                  )}
+                </div>
                 <Button variant="default" className="w-full">
                   Ver Deals
                 </Button>
@@ -370,7 +439,7 @@ export default function ClientsPage() {
         </div>
       )}
 
-      {/* Modal Nuevo Cliente */}
+      {/* Modal Nuevo Cliente - Solo se abre si es admin */}
       <NewClientModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}

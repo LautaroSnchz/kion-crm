@@ -37,13 +37,13 @@ export function Topbar() {
       {/* Badge de rol + Theme Toggle */}
       <div className="flex items-center gap-2">
         {user && (
-          <div
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              user.role === "admin"
-                ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
-                : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-            }`}
-          >
+<div
+  className={`px-2 py-1 rounded-full text-xs font-medium ${
+    user.role === "admin"
+      ? "bg-cyan-500 text-white dark:bg-cyan-600 dark:text-white"
+      : "bg-cyan-500 text-white dark:bg-cyan-600 dark:text-white"
+  }`}
+>
             {user.role === "admin" ? "Admin" : "Demo"}
           </div>
         )}

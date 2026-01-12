@@ -117,11 +117,11 @@ A full-stack Customer Relationship Management system designed for small to mediu
 ## 📸 Screenshots
 
 ### Dashboard (Light Mode)
-![Dashboard Light](docs/screenshots/dashboard-light-mode.png)
+![Dashboard Light](docs/screenshots/dashboard-lightmode.png)
 *Revenue overview, quick stats, and top performers*
 
 ### Dashboard (Dark Mode)
-![Dashboard Dark](docs/screenshots/dashboard-dark-mode.png)
+![Dashboard Dark](docs/screenshots/dashboard-darkmode.png)
 *Full dark mode support with adaptive colors*
 
 ### Clients Management

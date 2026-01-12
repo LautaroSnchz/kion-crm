@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, UserPlus, Mail, Phone, Building, X, ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { NewClientModal } from "@/components/modals";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { TableSkeleton } from "@/components/ui/Skeletons";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -114,11 +115,20 @@ export default function ClientsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [clients, setClients] = useState(INITIAL_CLIENTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
 
   // 🔑 Obtener usuario y rol
   const { user } = useAuth();
   const isDemo = user?.role === "demo";
+
+  // Simular carga inicial
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Filtrado
   const filteredData = clients.filter(c => 
@@ -155,7 +165,6 @@ export default function ClientsPage() {
       });
       return;
     }
-    // Aquí iría la lógica de edición
     toast.success("Función en desarrollo");
   };
 
@@ -235,111 +244,117 @@ export default function ClientsPage() {
           </div>
         )}
 
-        {/* Tabla */}
-        <div className="border border-[var(--border)] rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-[var(--muted)] border-b border-[var(--border)]">
-              <tr>
-                <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Cliente</th>
-                <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Empresa</th>
-                <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Estado</th>
-                <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Deals</th>
-                <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Valor</th>
-                <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Último contacto</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.length === 0 ? (
+        {/* Tabla CON SKELETON */}
+        {loading ? (
+          <TableSkeleton rows={5} columns={6} />
+        ) : (
+          <div className="border border-[var(--border)] rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-[var(--muted)] border-b border-[var(--border)]">
                 <tr>
-                  <td colSpan={6} className="p-12 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <Search className="w-12 h-12 text-[var(--muted-foreground)] opacity-50" />
-                      <p className="text-[var(--muted-foreground)]">
-                        No se encontraron clientes
-                      </p>
-                    </div>
-                  </td>
+                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Cliente</th>
+                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Empresa</th>
+                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Estado</th>
+                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Deals</th>
+                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Valor</th>
+                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Último contacto</th>
                 </tr>
-              ) : (
-                paginatedData.map((client) => (
-                  <tr
-                    key={client.id}
-                    onClick={() => setSelectedClient(client)}
-                    className="border-t border-[var(--border)] kion-row-hover transition-all cursor-pointer group"
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                          {client.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors truncate">
-                            {client.name}
-                          </p>
-                          <p className="text-sm text-[var(--muted-foreground)] truncate">{client.email}</p>
-                        </div>
+              </thead>
+              <tbody>
+                {paginatedData.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-12 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <Search className="w-12 h-12 text-[var(--muted-foreground)] opacity-50" />
+                        <p className="text-[var(--muted-foreground)]">
+                          No se encontraron clientes
+                        </p>
                       </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Building className="w-4 h-4 text-[var(--muted-foreground)]" />
-                        <span className="text-sm text-[var(--foreground)]">{client.company}</span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <Badge variant={client.status === "active" ? "success" : "warning"}>
-                        {client.status === "active" ? "Activo" : "Pendiente"}
-                      </Badge>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-[var(--foreground)]">{client.deals}</span>
-                        <span className="text-xs text-[var(--muted-foreground)]">deals</span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className="font-semibold text-[var(--foreground)]">
-                        ${client.value.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span className="text-sm text-[var(--muted-foreground)]">
-                        {client.lastContact}
-                      </span>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ) : (
+                  paginatedData.map((client) => (
+                    <tr
+                      key={client.id}
+                      onClick={() => setSelectedClient(client)}
+                      className="border-t border-[var(--border)] kion-row-hover transition-all cursor-pointer group"
+                    >
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                            {client.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors truncate">
+                              {client.name}
+                            </p>
+                            <p className="text-sm text-[var(--muted-foreground)] truncate">{client.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Building className="w-4 h-4 text-[var(--muted-foreground)]" />
+                          <span className="text-sm text-[var(--foreground)]">{client.company}</span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <Badge variant={client.status === "active" ? "success" : "warning"}>
+                          {client.status === "active" ? "Activo" : "Pendiente"}
+                        </Badge>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-[var(--foreground)]">{client.deals}</span>
+                          <span className="text-xs text-[var(--muted-foreground)]">deals</span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span className="font-semibold text-[var(--foreground)]">
+                          ${client.value.toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className="text-sm text-[var(--muted-foreground)]">
+                          {client.lastContact}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Paginación */}
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Mostrando {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredData.length)} de {filteredData.length} clientes
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="default"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="flex items-center gap-1 disabled:opacity-50"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Anterior
-            </Button>
-            <Button
-              variant="default"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="flex items-center gap-1 disabled:opacity-50"
-            >
-              Siguiente
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+        {!loading && (
+          <div className="flex items-center justify-between mt-4">
+            <p className="text-sm text-[var(--muted-foreground)]">
+              Mostrando {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredData.length)} de {filteredData.length} clientes
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1 disabled:opacity-50"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Anterior
+              </Button>
+              <Button
+                variant="default"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1 disabled:opacity-50"
+              >
+                Siguiente
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </Card>
 
       {/* Sidebar de detalle */}
@@ -439,7 +454,7 @@ export default function ClientsPage() {
         </div>
       )}
 
-      {/* Modal Nuevo Cliente - Solo se abre si es admin */}
+      {/* Modal Nuevo Cliente */}
       <NewClientModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}

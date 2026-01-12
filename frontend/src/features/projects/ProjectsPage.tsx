@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   LayoutGrid, 
   List, 
@@ -28,6 +28,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { NewDealModal } from "@/components/modals";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { KanbanSkeleton } from "@/components/ui/Skeletons";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -217,7 +218,7 @@ function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void 
               <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
               <span className="text-xs text-[var(--muted-foreground)]">{priority.label}</span>
             </div>
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-semibold">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">
               {deal.ownerAvatar}
             </div>
           </div>
@@ -253,10 +254,19 @@ export default function ProjectsPage() {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // 🔑 Obtener usuario y rol
   const { user } = useAuth();
   const isDemo = user?.role === "demo";
+
+  // Simular carga inicial
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -428,74 +438,78 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {/* Vista Kanban con Drag & Drop */}
+      {/* Vista Kanban con Drag & Drop Y SKELETON */}
       {view === "kanban" && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {dealsByStage.map((stage) => (
-              <div key={stage.id} className="flex flex-col">
-                
-                {/* Header de columna - droppable zone */}
-                <div 
-                  className="mb-4 p-3 rounded-lg border-2 border-dashed border-transparent hover:border-[var(--border)] transition-colors"
-                  style={{ minHeight: '60px' }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={`w-2 h-2 rounded-full ${stage.color}`} />
-                    <h3 className="font-semibold text-[var(--foreground)]">{stage.name}</h3>
-                    <span className="text-sm text-[var(--muted-foreground)]">
-                      ({stage.deals.length})
-                    </span>
+        loading ? (
+          <KanbanSkeleton columns={4} cardsPerColumn={2} />
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {dealsByStage.map((stage) => (
+                <div key={stage.id} className="flex flex-col">
+                  
+                  {/* Header de columna - droppable zone */}
+                  <div 
+                    className="mb-4 p-3 rounded-lg border-2 border-dashed border-transparent hover:border-[var(--border)] transition-colors"
+                    style={{ minHeight: '60px' }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-2 h-2 rounded-full ${stage.color}`} />
+                      <h3 className="font-semibold text-[var(--foreground)]">{stage.name}</h3>
+                      <span className="text-sm text-[var(--muted-foreground)]">
+                        ({stage.deals.length})
+                      </span>
+                    </div>
+                    <p className="text-sm text-[var(--muted-foreground)] flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      ${(stage.totalValue / 1000).toFixed(0)}K
+                    </p>
                   </div>
-                  <p className="text-sm text-[var(--muted-foreground)] flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    ${(stage.totalValue / 1000).toFixed(0)}K
-                  </p>
+
+                  {/* Cards de deals */}
+                  <SortableContext
+                    items={stage.deals.map(d => d.id)}
+                    strategy={verticalListSortingStrategy}
+                    id={stage.id}
+                  >
+                    <div className="space-y-3 flex-1">
+                      {stage.deals.length === 0 ? (
+                        <Card className="p-6 text-center border-dashed">
+                          <p className="text-sm text-[var(--muted-foreground)]">
+                            Arrastrá deals aquí
+                          </p>
+                        </Card>
+                      ) : (
+                        stage.deals.map(deal => (
+                          <DraggableDealCard 
+                            key={deal.id} 
+                            deal={deal}
+                            onClick={() => setSelectedDeal(deal)}
+                          />
+                        ))
+                      )}
+                    </div>
+                  </SortableContext>
                 </div>
+              ))}
+            </div>
 
-                {/* Cards de deals */}
-                <SortableContext
-                  items={stage.deals.map(d => d.id)}
-                  strategy={verticalListSortingStrategy}
-                  id={stage.id}
-                >
-                  <div className="space-y-3 flex-1">
-                    {stage.deals.length === 0 ? (
-                      <Card className="p-6 text-center border-dashed">
-                        <p className="text-sm text-[var(--muted-foreground)]">
-                          Arrastrá deals aquí
-                        </p>
-                      </Card>
-                    ) : (
-                      stage.deals.map(deal => (
-                        <DraggableDealCard 
-                          key={deal.id} 
-                          deal={deal}
-                          onClick={() => setSelectedDeal(deal)}
-                        />
-                      ))
-                    )}
-                  </div>
-                </SortableContext>
-              </div>
-            ))}
-          </div>
-
-          {/* Drag overlay */}
-          <DragOverlay>
-            {activeDeal ? (
-              <Card className="p-3 opacity-90 rotate-3 shadow-xl">
-                <p className="font-semibold text-sm">{activeDeal.title}</p>
-              </Card>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+            {/* Drag overlay */}
+            <DragOverlay>
+              {activeDeal ? (
+                <Card className="p-3 opacity-90 rotate-3 shadow-xl">
+                  <p className="font-semibold text-sm">{activeDeal.title}</p>
+                </Card>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        )
       )}
 
       {/* Vista Lista */}
@@ -541,7 +555,7 @@ export default function ProjectsPage() {
                       </td>
                       <td className="py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-semibold">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">
                             {deal.ownerAvatar}
                           </div>
                           <span className="text-sm text-[var(--muted-foreground)]">{deal.owner}</span>
@@ -607,7 +621,7 @@ export default function ProjectsPage() {
             <div className="mb-6">
               <h3 className="font-semibold text-[var(--foreground)] mb-3">Responsable</h3>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold">
                   {selectedDeal.ownerAvatar}
                 </div>
                 <div>
@@ -643,7 +657,7 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {/* Modal Nuevo Deal - Solo se abre si es admin */}
+      {/* Modal Nuevo Deal */}
       <NewDealModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}

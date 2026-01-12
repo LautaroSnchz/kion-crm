@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   TrendingUp, 
   DollarSign, 
@@ -13,6 +13,7 @@ import {
   Calendar
 } from "lucide-react";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { MetricCardSkeleton, ChartSkeleton } from "@/components/ui/Skeletons";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -102,6 +103,15 @@ const QUICK_STATS = [
 
 export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState("6m");
+  const [loading, setLoading] = useState(true);
+
+  // Simular carga inicial
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="p-6 space-y-6 bg-[var(--background)] min-h-screen">
@@ -131,182 +141,217 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {QUICK_STATS.map((stat) => (
-          <Card key={stat.label} className="p-5 hover:shadow-lg transition-all cursor-pointer group">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <p className="text-sm text-[var(--muted-foreground)]">{stat.label}</p>
-                <p className="text-3xl font-bold text-[var(--foreground)]">{stat.value}</p>
-                <div className="flex items-center gap-1">
-                  {stat.trend === "up" ? (
-                    <ArrowUpRight className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <ArrowDownRight className="w-4 h-4 text-red-500" />
-                  )}
-                  <span className={`text-sm font-medium ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}>
-                    {stat.change}
-                  </span>
-                  <span className="text-xs text-[var(--muted-foreground)] ml-1">vs mes anterior</span>
+      {/* Quick Stats CON SKELETON */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <MetricCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {QUICK_STATS.map((stat) => (
+            <Card key={stat.label} className="p-5 hover:shadow-lg transition-all cursor-pointer group">
+              <div className="flex items-start justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm text-[var(--muted-foreground)]">{stat.label}</p>
+                  <p className="text-3xl font-bold text-[var(--foreground)]">{stat.value}</p>
+                  <div className="flex items-center gap-1">
+                    {stat.trend === "up" ? (
+                      <ArrowUpRight className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <ArrowDownRight className="w-4 h-4 text-red-500" />
+                    )}
+                    <span className={`text-sm font-medium ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}>
+                      {stat.change}
+                    </span>
+                    <span className="text-xs text-[var(--muted-foreground)] ml-1">vs mes anterior</span>
+                  </div>
+                </div>
+                <div className={`p-3 rounded-xl bg-[var(--muted)] ${stat.color} group-hover:scale-110 transition-transform`}>
+                  <stat.icon className="w-6 h-6" />
                 </div>
               </div>
-              <div className={`p-3 rounded-xl bg-[var(--muted)] ${stat.color} group-hover:scale-110 transition-transform`}>
-                <stat.icon className="w-6 h-6" />
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {/* Revenue Chart & Pipeline */}
+      {/* Revenue Chart & Pipeline CON SKELETON */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Revenue Chart */}
-        <Card className="p-6 lg:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-[var(--foreground)]">Revenue Overview</h3>
-              <p className="text-sm text-[var(--muted-foreground)] mt-1">Ingresos mensuales vs objetivo</p>
-            </div>
-            <Badge variant="success">+15% vs target</Badge>
+        {loading ? (
+          <div className="lg:col-span-2">
+            <ChartSkeleton />
           </div>
-          
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={REVENUE_DATA}>
-              <defs>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="month" stroke="var(--muted-foreground)" />
-              <YAxis stroke="var(--muted-foreground)" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: "var(--card)", 
-                  border: "1px solid var(--border)",
-                  borderRadius: "8px"
-                }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#8B5CF6" 
-                strokeWidth={3}
-                fill="url(#colorRevenue)" 
-              />
-              <Line 
-                type="monotone" 
-                dataKey="target" 
-                stroke="#94a3b8" 
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Card>
+        ) : (
+          <Card className="p-6 lg:col-span-2">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-[var(--foreground)]">Revenue Overview</h3>
+                <p className="text-sm text-[var(--muted-foreground)] mt-1">Ingresos mensuales vs objetivo</p>
+              </div>
+              <Badge variant="success">+15% vs target</Badge>
+            </div>
+            
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={REVENUE_DATA}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#06B6D4" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="month" stroke="var(--muted-foreground)" />
+                <YAxis stroke="var(--muted-foreground)" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: "var(--card)", 
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px"
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="#06B6D4" 
+                  strokeWidth={3}
+                  fill="url(#colorRevenue)" 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="target" 
+                  stroke="#94a3b8" 
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Card>
+        )}
 
         {/* Top Performers */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">Top Performers</h3>
-          <div className="space-y-4">
-            {TOP_PERFORMERS.map((performer, index) => (
-              <div key={performer.id} className="flex items-center gap-3 group cursor-pointer">
-                <div className="flex-shrink-0">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm">
-                      {performer.avatar}
+        {loading ? (
+          <Card className="p-6">
+            <div className="h-6 bg-[var(--muted-foreground)]/20 rounded animate-pulse w-32 mb-4" />
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[var(--muted-foreground)]/20 animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-[var(--muted-foreground)]/20 rounded animate-pulse w-24" />
+                    <div className="h-3 bg-[var(--muted-foreground)]/20 rounded animate-pulse w-32" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : (
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">Top Performers</h3>
+            <div className="space-y-4">
+              {TOP_PERFORMERS.map((performer, index) => (
+                <div key={performer.id} className="flex items-center gap-3 group cursor-pointer">
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm">
+                        {performer.avatar}
+                      </div>
+                      {index === 0 && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center text-xs">
+                          🏆
+                        </div>
+                      )}
                     </div>
-                    {index === 0 && (
-                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center text-xs">
-                        🏆
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">
+                      {performer.name}
+                    </p>
+                    <p className="text-sm text-[var(--muted-foreground)]">
+                      {performer.deals} deals · {performer.revenue}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
+                    <ArrowUpRight className="w-4 h-4" />
+                    {performer.trend}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+      </div>
+
+      {/* Pipeline Visual */}
+      {!loading && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-[var(--foreground)] mb-6">Sales Pipeline</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {PIPELINE_STAGES.map((stage) => (
+              <div 
+                key={stage.id} 
+                className="group cursor-pointer"
+              >
+                <div className="p-4 rounded-lg bg-[var(--muted)] hover:bg-[var(--muted)]/70 transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-[var(--foreground)]">{stage.name}</h4>
+                    <div className={`w-2 h-2 rounded-full ${stage.color}`}></div>
+                  </div>
+                  <p className="text-2xl font-bold text-[var(--foreground)] mb-1">{stage.count}</p>
+                  <p className="text-sm text-[var(--muted-foreground)] mb-3">{stage.value}</p>
+                  
+                  <div className="space-y-2">
+                    {stage.deals.slice(0, 2).map((deal, idx) => (
+                      <div 
+                        key={idx}
+                        className="text-xs px-2 py-1 rounded bg-[var(--background)] text-[var(--foreground)] truncate"
+                      >
+                        {deal}
+                      </div>
+                    ))}
+                    {stage.deals.length > 2 && (
+                      <div className="text-xs text-[var(--muted-foreground)]">
+                        +{stage.deals.length - 2} más
                       </div>
                     )}
                   </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">
-                    {performer.name}
-                  </p>
-                  <p className="text-sm text-[var(--muted-foreground)]">
-                    {performer.deals} deals · {performer.revenue}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
-                  <ArrowUpRight className="w-4 h-4" />
-                  {performer.trend}
                 </div>
               </div>
             ))}
           </div>
         </Card>
-      </div>
-
-      {/* Pipeline Visual */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-[var(--foreground)] mb-6">Sales Pipeline</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {PIPELINE_STAGES.map((stage) => (
-            <div 
-              key={stage.id} 
-              className="group cursor-pointer"
-            >
-              <div className="p-4 rounded-lg bg-[var(--muted)] hover:bg-[var(--muted)]/70 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-[var(--foreground)]">{stage.name}</h4>
-                  <div className={`w-2 h-2 rounded-full ${stage.color}`}></div>
-                </div>
-                <p className="text-2xl font-bold text-[var(--foreground)] mb-1">{stage.count}</p>
-                <p className="text-sm text-[var(--muted-foreground)] mb-3">{stage.value}</p>
-                
-                <div className="space-y-2">
-                  {stage.deals.slice(0, 2).map((deal, idx) => (
-                    <div 
-                      key={idx}
-                      className="text-xs px-2 py-1 rounded bg-[var(--background)] text-[var(--foreground)] truncate"
-                    >
-                      {deal}
-                    </div>
-                  ))}
-                  {stage.deals.length > 2 && (
-                    <div className="text-xs text-[var(--muted-foreground)]">
-                      +{stage.deals.length - 2} más
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      )}
 
       {/* Recent Activity */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-[var(--foreground)] mb-6">Actividad Reciente</h3>
-        <div className="space-y-4">
-          {RECENT_ACTIVITY.map((activity) => (
-            <div key={activity.id} className="flex items-start gap-4 group cursor-pointer hover:bg-[var(--muted)]/50 p-3 rounded-lg transition-all">
-              <div className={`p-2 rounded-lg bg-[var(--muted)] ${activity.color}`}>
-                <activity.icon className="w-4 h-4" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-[var(--foreground)]">
-                  <span className="font-medium">Usuario</span> {activity.action}{" "}
-                  <span className="font-medium text-[var(--primary)]">{activity.client}</span>
-                  {activity.value && <span className="text-[var(--muted-foreground)]"> · {activity.value}</span>}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Clock className="w-3 h-3 text-[var(--muted-foreground)]" />
-                  <span className="text-xs text-[var(--muted-foreground)]">{activity.time}</span>
+      {!loading && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-[var(--foreground)] mb-6">Actividad Reciente</h3>
+          <div className="space-y-4">
+            {RECENT_ACTIVITY.map((activity) => (
+              <div key={activity.id} className="flex items-start gap-4 group cursor-pointer hover:bg-[var(--muted)]/50 p-3 rounded-lg transition-all">
+                <div className={`p-2 rounded-lg bg-[var(--muted)] ${activity.color}`}>
+                  <activity.icon className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-[var(--foreground)]">
+                    <span className="font-medium">Usuario</span> {activity.action}{" "}
+                    <span className="font-medium text-[var(--primary)]">{activity.client}</span>
+                    {activity.value && <span className="text-[var(--muted-foreground)]"> · {activity.value}</span>}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Clock className="w-3 h-3 text-[var(--muted-foreground)]" />
+                    <span className="text-xs text-[var(--muted-foreground)]">{activity.time}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+      )}
 
     </div>
   );

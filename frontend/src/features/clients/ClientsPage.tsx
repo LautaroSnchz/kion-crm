@@ -32,14 +32,24 @@ const Input = ({ className = "", ...props }: any) => (
   />
 );
 
-const Badge = ({ children, variant = "default" }: any) => {
-  const variants = {
-    default: "bg-[var(--muted)] text-[var(--muted-foreground)]",
-    success: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-    warning: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+// Badge con dual theme (light/dark)
+const Badge = ({ children, variant = "default", isDark }: any) => {
+  const getVariantClasses = () => {
+    if (variant === "success") {
+      return isDark 
+        ? "bg-green-900/30 text-green-400 border-green-800" 
+        : "bg-green-600 text-white border-green-600";
+    }
+    if (variant === "warning") {
+      return isDark 
+        ? "bg-yellow-900/30 text-yellow-400 border-yellow-800" 
+        : "bg-yellow-600 text-white border-yellow-600";
+    }
+    return "bg-[var(--muted)] text-[var(--muted-foreground)] border-[var(--border)]";
   };
+
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${variants[variant]}`}>
+    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getVariantClasses()}`}>
       {children}
     </span>
   );
@@ -121,6 +131,24 @@ export default function ClientsPage() {
   // 🔑 Obtener usuario y rol
   const { user } = useAuth();
   const isDemo = user?.role === "demo";
+
+  // 🌓 Detectar tema dark/light
+  const [isDark, setIsDark] = useState(
+    document.documentElement.classList.contains('dark')
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   // Simular carga inicial
   useEffect(() => {
@@ -229,19 +257,38 @@ export default function ClientsPage() {
         {/* Divider */}
         <div className="kion-divider mb-6" />
 
-        {/* Banner informativo para demo mode */}
+        {/* Banner informativo para demo mode - DUAL THEME */}
         {isDemo && (
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-3">
-            <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                Modo Demo Activo
-              </p>
-              <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                Estás navegando en modo solo lectura. Las funciones de creación y edición están deshabilitadas.
-              </p>
+          isDark ? (
+            // ====== DARK MODE BANNER ======
+            <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg flex items-start gap-3">
+              <Lock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-blue-100">
+                  Modo Demo Activo
+                </p>
+                <p className="text-xs text-blue-300 mt-1">
+                  Estás navegando en modo solo lectura. Las funciones de creación y edición están deshabilitadas.
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            // ====== LIGHT MODE BANNER ======
+            <div className="mb-6 p-4 rounded-lg flex items-start gap-3" style={{
+              backgroundColor: '#e0f2fe',
+              border: '2px solid #06b6d4'
+            }}>
+              <Lock className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#0891b2' }} />
+              <div>
+                <p className="text-sm font-bold" style={{ color: '#000000' }}>
+                  Modo Demo Activo
+                </p>
+                <p className="text-xs font-medium mt-1" style={{ color: '#1f2937' }}>
+                  Estás navegando en modo solo lectura. Las funciones de creación y edición están deshabilitadas.
+                </p>
+              </div>
+            </div>
+          )
         )}
 
         {/* Tabla CON SKELETON */}
@@ -281,7 +328,7 @@ export default function ClientsPage() {
                     >
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                             {client.name.charAt(0)}
                           </div>
                           <div className="min-w-0">
@@ -299,7 +346,10 @@ export default function ClientsPage() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <Badge variant={client.status === "active" ? "success" : "warning"}>
+                        <Badge 
+                          variant={client.status === "active" ? "success" : "warning"}
+                          isDark={isDark}
+                        >
                           {client.status === "active" ? "Activo" : "Pendiente"}
                         </Badge>
                       </td>
@@ -379,7 +429,10 @@ export default function ClientsPage() {
               
               {/* Estado */}
               <div>
-                <Badge variant={selectedClient.status === "active" ? "success" : "warning"}>
+                <Badge 
+                  variant={selectedClient.status === "active" ? "success" : "warning"}
+                  isDark={isDark}
+                >
                   {selectedClient.status === "active" ? "Cliente Activo" : "Pendiente"}
                 </Badge>
               </div>

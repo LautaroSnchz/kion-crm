@@ -14,8 +14,8 @@ const buttonVariants = cva(
         default:
           "bg-primary text-primary-foreground hover:bg-primary/90",
 
-
-kion: "[background-color:var(--primary)] text-primary-foreground shadow-md hover:shadow-lg ring-1 ring-ring transition-all duration-200 active:translate-y-px hover:bg-primary/90",        
+        kion: "btn-kion", // ← CAMBIAR SOLO ESTA LÍNEA
+        
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
 

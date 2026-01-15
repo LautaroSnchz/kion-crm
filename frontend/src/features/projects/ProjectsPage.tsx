@@ -50,14 +50,29 @@ const Button = ({ className = "", children, variant = "default", ...props }: any
   );
 };
 
-const Badge = ({ children, variant = "default" }: any) => {
-  const variants = {
-    high: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
-    medium: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
-    low: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
+// Badge con dual theme
+const Badge = ({ children, variant = "default", isDark }: any) => {
+  const getVariantClasses = () => {
+    if (variant === "high") {
+      return isDark 
+        ? "bg-red-900/30 text-red-400 border-red-800" 
+        : "bg-red-600 text-white border-red-600";
+    }
+    if (variant === "medium") {
+      return isDark 
+        ? "bg-yellow-900/30 text-yellow-400 border-yellow-800" 
+        : "bg-yellow-600 text-white border-yellow-600";
+    }
+    if (variant === "low") {
+      return isDark 
+        ? "bg-green-900/30 text-green-400 border-green-800" 
+        : "bg-green-600 text-white border-green-600";
+    }
+    return "bg-[var(--muted)] text-[var(--muted-foreground)] border-[var(--border)]";
   };
+
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${variants[variant] || variants.high}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getVariantClasses()}`}>
       {children}
     </span>
   );
@@ -216,30 +231,38 @@ function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void 
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
-              <span className="text-xs text-[var(--muted-foreground)]">{priority.label}</span>
+              <span className="text-xs text-[var(--muted-foreground)]">
+                {priority.label}
+              </span>
             </div>
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">
               {deal.ownerAvatar}
             </div>
           </div>
 
-          {/* Cliente */}
-          <p className="text-xs text-[var(--muted-foreground)] mb-1">{deal.client}</p>
-          
-          {/* Título del deal */}
-          <h4 className="font-semibold text-sm text-[var(--foreground)] mb-3 group-hover:text-[var(--primary)] transition-colors line-clamp-2">
+          {/* Título */}
+          <h4 className="font-semibold text-sm text-[var(--foreground)] mb-2 line-clamp-2">
             {deal.title}
           </h4>
 
+          {/* Cliente */}
+          <p className="text-xs text-[var(--muted-foreground)] mb-3">
+            {deal.client}
+          </p>
+
           {/* Footer: Valor + Fecha */}
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1 text-[var(--foreground)] font-semibold">
-              <DollarSign className="w-3 h-3" />
-              ${(deal.value / 1000).toFixed(0)}K
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+            <div className="flex items-center gap-1">
+              <DollarSign className="w-3 h-3 text-[var(--muted-foreground)]" />
+              <span className="text-sm font-semibold text-[var(--foreground)]">
+                ${(deal.value / 1000).toFixed(0)}K
+              </span>
             </div>
-            <div className="flex items-center gap-1 text-[var(--muted-foreground)]">
-              <Calendar className="w-3 h-3" />
-              {new Date(deal.closeDate).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-[var(--muted-foreground)]" />
+              <span className="text-xs text-[var(--muted-foreground)]">
+                {new Date(deal.closeDate).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}
+              </span>
             </div>
           </div>
         </div>
@@ -252,13 +275,31 @@ export default function ProjectsPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [deals, setDeals] = useState<Deal[]>(INITIAL_DEALS);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
-  const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
   const [loading, setLoading] = useState(true);
 
   // 🔑 Obtener usuario y rol
   const { user } = useAuth();
   const isDemo = user?.role === "demo";
+
+  // 🌓 Detectar tema dark/light
+  const [isDark, setIsDark] = useState(
+    document.documentElement.classList.contains('dark')
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   // Simular carga inicial
   useEffect(() => {
@@ -268,6 +309,7 @@ export default function ProjectsPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // DnD Sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -276,66 +318,12 @@ export default function ProjectsPage() {
     })
   );
 
-  // Organizar deals por stage
+  // Agrupar deals por stage
   const dealsByStage = STAGES.map(stage => ({
     ...stage,
     deals: deals.filter(d => d.stage === stage.id),
-    totalValue: deals
-      .filter(d => d.stage === stage.id)
-      .reduce((sum, d) => sum + d.value, 0)
+    totalValue: deals.filter(d => d.stage === stage.id).reduce((sum, d) => sum + d.value, 0)
   }));
-
-  const totalValue = deals.reduce((sum, d) => sum + d.value, 0);
-
-  const handleDragStart = (event: any) => {
-    const deal = deals.find(d => d.id === event.active.id);
-    setActiveDeal(deal || null);
-  };
-
-  const handleDragOver = (event: any) => {
-    const { active, over } = event;
-    if (!over) return;
-
-    const activeDeal = deals.find(d => d.id === active.id);
-    if (!activeDeal) return;
-
-    // Buscar el stage sobre el que está el drag
-    const overStage = STAGES.find(s => 
-      deals.some(d => d.id === over.id && d.stage === s.id)
-    );
-
-    if (overStage && activeDeal.stage !== overStage.id) {
-      setDeals(prevDeals => 
-        prevDeals.map(d => 
-          d.id === active.id 
-            ? { ...d, stage: overStage.id as Stage }
-            : d
-        )
-      );
-    }
-  };
-
-  const handleDragEnd = () => {
-    setActiveDeal(null);
-  };
-
-  // Handler para crear nuevo deal desde el modal con validación demo
-  const handleDealCreated = (newDealFromModal: any) => {
-    const newDeal: Deal = {
-      id: Date.now().toString(),
-      title: newDealFromModal.title,
-      client: newDealFromModal.client,
-      value: newDealFromModal.value,
-      closeDate: newDealFromModal.deadline,
-      priority: PRIORITY_MAP[newDealFromModal.priority] || "medium",
-      owner: newDealFromModal.assignee === "MG" ? "María G." : 
-             newDealFromModal.assignee === "JP" ? "Juan P." : "Ana S.",
-      ownerAvatar: newDealFromModal.assignee,
-      stage: STAGE_MAP[newDealFromModal.stage] || "lead"
-    };
-
-    setDeals(prev => [newDeal, ...prev]);
-  };
 
   // Handler para botón "Nuevo Deal" con validación de demo
   const handleNewDealClick = () => {
@@ -359,49 +347,108 @@ export default function ProjectsPage() {
     toast.success("Función en desarrollo");
   };
 
+  const handleDragStart = (event: any) => {
+    const deal = deals.find(d => d.id === event.active.id);
+    setActiveDeal(deal || null);
+  };
+
+  const handleDragEnd = (event: any) => {
+    setActiveDeal(null);
+    
+    const { active, over } = event;
+    
+    if (!over) return;
+    
+    const activeId = active.id;
+    const overId = over.id;
+    
+    // Si el overId es un stage, mover el deal a ese stage
+    const targetStage = STAGES.find(s => s.id === overId);
+    if (targetStage) {
+      setDeals(prevDeals =>
+        prevDeals.map(deal =>
+          deal.id === activeId
+            ? { ...deal, stage: targetStage.id as Stage }
+            : deal
+        )
+      );
+      return;
+    }
+    
+    // Si el overId es otro deal, reordenar
+    const activeDeal = deals.find(d => d.id === activeId);
+    const overDeal = deals.find(d => d.id === overId);
+    
+    if (!activeDeal || !overDeal) return;
+    
+    // Si están en diferentes stages, mover al stage del over
+    if (activeDeal.stage !== overDeal.stage) {
+      setDeals(prevDeals =>
+        prevDeals.map(deal =>
+          deal.id === activeId
+            ? { ...deal, stage: overDeal.stage }
+            : deal
+        )
+      );
+    }
+  };
+
+  const handleDealCreated = (newDeal: any) => {
+    const dealToAdd: Deal = {
+      id: Date.now().toString(),
+      title: newDeal.title,
+      client: newDeal.client,
+      value: parseInt(newDeal.value),
+      closeDate: newDeal.closeDate,
+      priority: PRIORITY_MAP[newDeal.priority] || "medium",
+      owner: newDeal.owner,
+      ownerAvatar: newDeal.owner.split(' ').map((n: string) => n[0]).join('').toUpperCase(),
+      stage: STAGE_MAP[newDeal.stage] || "lead"
+    };
+    
+    setDeals(prev => [...prev, dealToAdd]);
+  };
+
   return (
     <div className="p-6 space-y-6 bg-[var(--background)]">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--foreground)]">Pipeline de Ventas</h1>
+          <h1 className="text-3xl font-bold text-[var(--foreground)]">Proyectos</h1>
           <p className="text-[var(--muted-foreground)] mt-1">
-            {deals.length} deals activos · ${(totalValue / 1000).toFixed(0)}K total
+            Pipeline de ventas · ${(deals.reduce((sum, d) => sum + d.value, 0) / 1000).toFixed(0)}K total
           </p>
         </div>
-
+        
         <div className="flex items-center gap-3">
-          {/* Toggle vista */}
-          <div className="flex items-center gap-1 p-1 bg-[var(--muted)] rounded-lg">
+          {/* Toggle view */}
+          <div className="flex items-center gap-1 bg-[var(--muted)] p-1 rounded-lg">
             <button
               onClick={() => setView("kanban")}
-              className={`p-2 rounded transition-colors ${
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                 view === "kanban" 
                   ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm" 
                   : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
               }`}
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-4 h-4 inline mr-1" />
+              Kanban
             </button>
             <button
               onClick={() => setView("list")}
-              className={`p-2 rounded transition-colors ${
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                 view === "list" 
                   ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm" 
                   : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
               }`}
             >
-              <List className="w-4 h-4" />
+              <List className="w-4 h-4 inline mr-1" />
+              Lista
             </button>
           </div>
 
-          <Button variant="ghost" className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filtros
-          </Button>
-          
-          {/* Botón con demo mode */}
+          {/* Botón Nuevo Deal con estado demo */}
           <div className="relative group">
             <Button 
               variant="primary" 
@@ -423,31 +470,49 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Banner informativo para demo mode */}
+      {/* Banner informativo para demo mode - DUAL THEME */}
       {isDemo && (
-        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-3">
-          <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              Modo Demo Activo
-            </p>
-            <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-              Puedes explorar el kanban y mover deals, pero la creación y edición están deshabilitadas.
-            </p>
+        isDark ? (
+          // ====== DARK MODE BANNER ======
+          <div className="p-4 bg-blue-900/20 border border-blue-800 rounded-lg flex items-start gap-3">
+            <Lock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-blue-100">
+                Modo Demo Activo
+              </p>
+              <p className="text-xs text-blue-300 mt-1">
+                Estás navegando en modo solo lectura. Las funciones de creación y edición están deshabilitadas.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          // ====== LIGHT MODE BANNER ======
+          <div className="p-4 rounded-lg flex items-start gap-3" style={{
+            backgroundColor: '#e0f2fe',
+            border: '2px solid #06b6d4'
+          }}>
+            <Lock className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#0891b2' }} />
+            <div>
+              <p className="text-sm font-bold" style={{ color: '#000000' }}>
+                Modo Demo Activo
+              </p>
+              <p className="text-xs font-medium mt-1" style={{ color: '#1f2937' }}>
+                Estás navegando en modo solo lectura. Las funciones de creación y edición están deshabilitadas.
+              </p>
+            </div>
+          </div>
+        )
       )}
 
-      {/* Vista Kanban con Drag & Drop Y SKELETON */}
+      {/* Vista Kanban */}
       {view === "kanban" && (
         loading ? (
-          <KanbanSkeleton columns={4} cardsPerColumn={2} />
+          <KanbanSkeleton columns={4} cardsPerColumn={3} />
         ) : (
           <DndContext
             sensors={sensors}
             collisionDetection={closestCorners}
             onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -545,7 +610,7 @@ export default function ProjectsPage() {
                         </span>
                       </td>
                       <td className="py-3">
-                        <Badge variant={deal.priority}>{PRIORITY_LABELS[deal.priority].label}</Badge>
+                        <Badge variant={deal.priority} isDark={isDark}>{PRIORITY_LABELS[deal.priority].label}</Badge>
                       </td>
                       <td className="py-3 font-semibold text-[var(--foreground)]">
                         ${(deal.value / 1000).toFixed(0)}K
@@ -578,7 +643,7 @@ export default function ProjectsPage() {
             <div className="flex items-start justify-between mb-6">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <Badge variant={selectedDeal.priority}>
+                  <Badge variant={selectedDeal.priority} isDark={isDark}>
                     {PRIORITY_LABELS[selectedDeal.priority].label}
                   </Badge>
                   <span className="text-sm text-[var(--muted-foreground)]">

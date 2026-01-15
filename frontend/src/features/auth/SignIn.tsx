@@ -90,18 +90,11 @@ export default function SignIn() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mb-4">
-            <img
-              src="/logo-light.png"
-              alt="Kion CRM"
-              className="w-16 h-16 dark:hidden"
-            />
-            <img
-              src="/logo-dark.png"
-              alt="Kion CRM"
-              className="w-16 h-16 hidden dark:block"
-            />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="KionCRM Logo" 
+            className="w-24 h-24 mx-auto mb-4 object-contain"
+          />
           <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
             KionCRM
           </h1>

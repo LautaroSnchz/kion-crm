@@ -15,7 +15,16 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:w-60 flex-col border-r bg-card p-4">
-      <div className="text-xl font-bold mb-4 text-foreground">KionCRM</div>
+      
+      {/* Header con logo */}
+      <div className="flex items-center gap-3 mb-4">
+        <img 
+          src="/logo.png" 
+          alt="KionCRM Logo" 
+          className="w-10 h-10 object-contain"
+        />
+        <div className="text-xl font-bold text-foreground">KionCRM</div>
+      </div>
       
       {/* Badge de rol */}
       {user && (
@@ -25,13 +34,13 @@ export function Sidebar() {
               <p className="text-xs text-[var(--muted-foreground)]">Sesión activa</p>
               <p className="text-sm font-medium text-[var(--foreground)]">{user.name}</p>
             </div>
-<div
-  className={`px-2 py-1 rounded-full text-xs font-medium ${
-    user.role === "admin"
-      ? "bg-cyan-500 text-white dark:bg-cyan-600 dark:text-white"
-      : "bg-cyan-500 text-white dark:bg-cyan-600 dark:text-white"
-  }`}
->
+            <div
+              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                user.role === "admin"
+                  ? "bg-cyan-500 text-white dark:bg-cyan-600 dark:text-white"
+                  : "bg-cyan-500 text-white dark:bg-cyan-600 dark:text-white"
+              }`}
+            >
               {user.role === "admin" ? "Admin" : "Demo"}
             </div>
           </div>

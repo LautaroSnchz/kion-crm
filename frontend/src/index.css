@@ -115,53 +115,60 @@
   /* NUEVAS UTILIDADES KIONCRM   */
   /* ---------------------------- */
 
-  /* Botón primario moderno */
-  .btn-kion{
-    background: var(--primary);
-    color: var(--primary-foreground);
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 14px rgba(6,182,212,.22);
-    transition: all .20s ease;
-    ring: 1px;
-    --tw-ring-color: var(--ring);
-  }
-  .btn-kion:hover{
-    filter: brightness(1.05);
-    box-shadow: 0 8px 26px rgba(6,182,212,.28);
-  }
-  .btn-kion:active{ transform: translateY(1px) }
+/* Botón primario moderno - MEJORADO */
+.btn-kion{
+  background: var(--primary);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.25);
+  font-weight: 600;
+  padding: 0.5rem 1.25rem; /* ← AGREGAR ESTA LÍNEA (py-2 px-5) */
+  transition: all .20s ease;
+  --tw-ring-color: var(--ring);
+}
 
+.btn-kion:hover{
+  background: #0891B2; /* Teal más oscuro al hover */
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
+  transform: translateY(-1px); /* Efecto lift sutil */
+}
 
+.btn-kion:active{ 
+  transform: translateY(0); 
+  box-shadow: 0 1px 4px rgba(6, 182, 212, 0.2);
+}
 
-  /* Divider teal */
-  .kion-divider{
-    height:1px;
-    background: rgba(6,182,212,.20);
-  }
+/* Divider teal */
+.kion-divider{
+  height:1px;
+  background: rgba(6,182,212,.20);
+}
 
-  /* Hover teal en filas */
-  .kion-row-hover:hover{
-    background: color-mix(in oklab, var(--primary) 8%, transparent);
-  }
-  /* Dark mode para botón Kion – alto contraste y legible */
+/* Hover teal en filas */
+.kion-row-hover:hover{
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+}
+/* Dark mode para botón Kion – más sobrio */
 .dark .btn-kion {
-  background: #22D3EE;        /* cyan brillante fijo */
-  color: #0F0F0F;              /* texto oscuro para contraste */
-  box-shadow:
-    0 0 0 1px rgba(34,211,238,.45),
-    0 8px 26px rgba(34,211,238,.35);
+  background: #22D3EE;
+  color: #0F0F0F; /* Texto oscuro para buen contraste */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(34, 211, 238, 0.3);
 }
 
 .dark .btn-kion:hover {
-  filter: brightness(1.08);
-  box-shadow:
-    0 0 0 1px rgba(34,211,238,.55),
-    0 10px 30px rgba(34,211,238,.45);
+  background: #06B6D4; /* Más oscuro al hover */
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.4);
+  transform: translateY(-1px);
 }
 
-.dark .btn-kion:active { transform: translateY(1px); }
-
-
+.dark .btn-kion:active { 
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(34, 211, 238, 0.25);
 }
 
 
@@ -242,3 +249,4 @@ select option:checked {
   background-color: #06B6D4 !important;  /* Teal en lugar de morado */
   color: white !important;
 }
+

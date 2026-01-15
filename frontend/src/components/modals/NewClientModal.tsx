@@ -109,7 +109,7 @@ export default function NewClientModal({ open, onClose, onClientCreated }: NewCl
             <Input
               value={formData.name}
               onChange={(e) => handleChange("name", e.target.value)}
-              placeholder="Juan PÃ©rez"
+              placeholder="John Wick"
               disabled={loading}
               className={errors.name ? "border-red-500" : ""}
             />
@@ -127,7 +127,7 @@ export default function NewClientModal({ open, onClose, onClientCreated }: NewCl
               type="email"
               value={formData.email}
               onChange={(e) => handleChange("email", e.target.value)}
-              placeholder="juan@empresa.com"
+              placeholder="John@empresa.com"
               disabled={loading}
               className={errors.email ? "border-red-500" : ""}
             />
@@ -136,10 +136,10 @@ export default function NewClientModal({ open, onClose, onClientCreated }: NewCl
             )}
           </div>
 
-          {/* TelÃ©fono */}
+          {/* Telefono */}
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
-              TelÃ©fono
+              Telefono
             </label>
             <Input
               value={formData.phone}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Search, UserPlus, Mail, Phone, Building, X, ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import { Search, UserPlus, Mail, Phone, Building, X, ChevronLeft, ChevronRight, Lock, Info } from "lucide-react";
 import { NewClientModal } from "@/components/modals";
 import { useAuth } from "@/hooks/useAuth";
+import { useClients } from "@/hooks/useClients";
 import { toast } from "sonner";
 import { TableSkeleton } from "@/components/ui/Skeletons";
 
@@ -55,75 +56,13 @@ const Badge = ({ children, variant = "default", isDark }: any) => {
   );
 };
 
-// Data fake inicial
-const INITIAL_CLIENTS = [
-  { 
-    id: "1", 
-    name: "Acme SA", 
-    email: "ventas@acme.com", 
-    phone: "+54 11 4567-8900",
-    company: "Acme Corporation",
-    status: "active", 
-    deals: 5, 
-    value: 45000,
-    lastContact: "Hace 2 días",
-    industry: "Technology"
-  },
-  { 
-    id: "2", 
-    name: "Globex Corp", 
-    email: "contacto@globex.io",
-    phone: "+54 11 4567-8901",
-    company: "Globex Industries",
-    status: "active", 
-    deals: 3, 
-    value: 28500,
-    lastContact: "Hace 1 semana",
-    industry: "Manufacturing"
-  },
-  { 
-    id: "3", 
-    name: "Initech", 
-    email: "info@initech.com",
-    phone: "+54 11 4567-8902",
-    company: "Initech Solutions",
-    status: "pending", 
-    deals: 1, 
-    value: 12000,
-    lastContact: "Hace 3 días",
-    industry: "Consulting"
-  },
-  { 
-    id: "4", 
-    name: "Umbrella Co", 
-    email: "sales@umbrella.com",
-    phone: "+54 11 4567-8903",
-    company: "Umbrella Corporation",
-    status: "active", 
-    deals: 8, 
-    value: 92000,
-    lastContact: "Hoy",
-    industry: "Pharmaceuticals"
-  },
-  { 
-    id: "5", 
-    name: "Stark Industries", 
-    email: "tony@stark.com",
-    phone: "+54 11 4567-8904",
-    company: "Stark Industries",
-    status: "active", 
-    deals: 12, 
-    value: 185000,
-    lastContact: "Hace 1 hora",
-    industry: "Technology"
-  },
-];
+// Data fake inicial - AHORA VIENE DEL STORAGE
+// (Ver src/lib/storage.ts para los datos iniciales)
 
 export default function ClientsPage() {
   const [q, setQ] = useState("");
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [clients, setClients] = useState(INITIAL_CLIENTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
@@ -131,6 +70,9 @@ export default function ClientsPage() {
   // 🔑 Obtener usuario y rol
   const { user } = useAuth();
   const isDemo = user?.role === "demo";
+
+  // 📦 Hook de localStorage para clientes
+  const { clients, addClient } = useClients();
 
   // 🌓 Detectar tema dark/light
   const [isDark, setIsDark] = useState(
@@ -171,7 +113,10 @@ export default function ClientsPage() {
   const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
   const handleClientCreated = (newClient: any) => {
-    setClients(prev => [newClient, ...prev]);
+    addClient(newClient);
+    toast.success("Cliente creado", {
+      description: `${newClient.name} agregado correctamente`
+    });
   };
 
   // Handler para botón "Nuevo Cliente" con validación de demo
@@ -204,29 +149,19 @@ export default function ClientsPage() {
         <div>
           <h1 className="text-3xl font-bold text-[var(--foreground)]">Clientes</h1>
           <p className="text-[var(--muted-foreground)] mt-1">
-            Gestiona tu cartera de {clients.length} clientes activos
+            Gestiona tu cartera de {clients.length} clientes
           </p>
         </div>
         
         {/* Botón con estado demo */}
-        <div className="relative group">
-          <Button 
-            variant="primary" 
-            className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-            onClick={handleNewClientClick}
-          >
-            {isDemo ? <Lock className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-            Nuevo Cliente
-          </Button>
-          
-          {/* Tooltip para demo mode */}
-          {isDemo && (
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-              🔒 Deshabilitado en modo demo
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-            </div>
-          )}
-        </div>
+        <Button 
+          variant="primary" 
+          className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
+          onClick={handleNewClientClick}
+        >
+          {isDemo ? <Lock className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+          Nuevo Cliente
+        </Button>
       </div>
 
       {/* Card principal */}

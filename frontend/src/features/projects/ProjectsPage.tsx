@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { 
   LayoutGrid, 
   List, 
@@ -27,8 +27,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { NewDealModal } from "@/components/modals";
 import { useAuth } from "@/hooks/useAuth";
+import { useDeals } from "@/hooks/useDeals";
 import { toast } from "sonner";
-import { KanbanSkeleton } from "@/components/ui/Skeletons";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -50,29 +50,14 @@ const Button = ({ className = "", children, variant = "default", ...props }: any
   );
 };
 
-// Badge con dual theme
-const Badge = ({ children, variant = "default", isDark }: any) => {
-  const getVariantClasses = () => {
-    if (variant === "high") {
-      return isDark 
-        ? "bg-red-900/30 text-red-400 border-red-800" 
-        : "bg-red-600 text-white border-red-600";
-    }
-    if (variant === "medium") {
-      return isDark 
-        ? "bg-yellow-900/30 text-yellow-400 border-yellow-800" 
-        : "bg-yellow-600 text-white border-yellow-600";
-    }
-    if (variant === "low") {
-      return isDark 
-        ? "bg-green-900/30 text-green-400 border-green-800" 
-        : "bg-green-600 text-white border-green-600";
-    }
-    return "bg-[var(--muted)] text-[var(--muted-foreground)] border-[var(--border)]";
+const Badge = ({ children, variant = "default" }: any) => {
+  const variants = {
+    high: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+    medium: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
+    low: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
   };
-
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getVariantClasses()}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${variants[variant] || variants.high}`}>
       {children}
     </span>
   );
@@ -93,76 +78,6 @@ interface Deal {
   ownerAvatar: string;
   stage: Stage;
 }
-
-// Data fake
-const INITIAL_DEALS: Deal[] = [
-  {
-    id: "1",
-    title: "Migración Cloud Platform",
-    client: "Acme SA",
-    value: 45000,
-    closeDate: "2025-02-15",
-    priority: "high",
-    owner: "María G.",
-    ownerAvatar: "MG",
-    stage: "lead"
-  },
-  {
-    id: "2",
-    title: "Sistema CRM Enterprise",
-    client: "Globex Corp",
-    value: 89000,
-    closeDate: "2025-01-30",
-    priority: "high",
-    owner: "Juan P.",
-    ownerAvatar: "JP",
-    stage: "qualified"
-  },
-  {
-    id: "3",
-    title: "Consultoría DevOps",
-    client: "Initech",
-    value: 12000,
-    closeDate: "2025-03-10",
-    priority: "low",
-    owner: "Ana S.",
-    ownerAvatar: "AS",
-    stage: "lead"
-  },
-  {
-    id: "4",
-    title: "Desarrollo Web App",
-    client: "Umbrella Co",
-    value: 67000,
-    closeDate: "2025-02-28",
-    priority: "medium",
-    owner: "María G.",
-    ownerAvatar: "MG",
-    stage: "proposal"
-  },
-  {
-    id: "5",
-    title: "Integración API B2B",
-    client: "Stark Industries",
-    value: 125000,
-    closeDate: "2025-01-20",
-    priority: "high",
-    owner: "Juan P.",
-    ownerAvatar: "JP",
-    stage: "closed"
-  },
-  {
-    id: "6",
-    title: "Auditoría de Seguridad",
-    client: "Wayne Enterprises",
-    value: 34000,
-    closeDate: "2025-02-05",
-    priority: "medium",
-    owner: "Ana S.",
-    ownerAvatar: "AS",
-    stage: "qualified"
-  },
-];
 
 const STAGES = [
   { id: "lead", name: "Lead", color: "bg-blue-500" },
@@ -193,7 +108,7 @@ const STAGE_MAP: Record<string, Stage> = {
 };
 
 // Componente de Deal Card con drag
-function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
+function DraggableDealCard({ deal, onClick, isDemo }: { deal: Deal; onClick: () => void; isDemo: boolean }) {
   const priority = PRIORITY_LABELS[deal.priority];
   
   const {
@@ -203,7 +118,10 @@ function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void 
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: deal.id });
+  } = useSortable({ 
+    id: deal.id,
+    disabled: isDemo
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -214,55 +132,62 @@ function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void 
   return (
     <div ref={setNodeRef} style={style}>
       <Card 
-        className="p-3 cursor-pointer hover:shadow-md transition-all group relative"
+        className={`p-3 hover:shadow-md transition-all group relative ${
+          isDemo ? 'cursor-not-allowed' : 'cursor-pointer'
+        }`}
         onClick={onClick}
+        title={isDemo ? "🔒 Modo demo - No se pueden editar deals" : ""}
       >
+        {/* Overlay de demo mode en hover */}
+        {isDemo && (
+          <div className="absolute inset-0 bg-black/5 dark:bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none flex items-center justify-center z-20">
+            <div className="bg-black/80 text-white px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-2">
+              <Lock className="w-3 h-3" />
+              Modo Demo
+            </div>
+          </div>
+        )}
+
         {/* Drag handle */}
-        <div
-          {...attributes}
-          {...listeners}
-          className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-        >
-          <GripVertical className="w-4 h-4 text-[var(--muted-foreground)]" />
-        </div>
+        {!isDemo && (
+          <div
+            {...attributes}
+            {...listeners}
+            className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10"
+          >
+            <GripVertical className="w-4 h-4 text-[var(--muted-foreground)]" />
+          </div>
+        )}
 
         <div className="pl-3">
           {/* Header: Prioridad + Avatar */}
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <div className={`w-2 h-2 rounded-full ${priority.dot}`} />
-              <span className="text-xs text-[var(--muted-foreground)]">
-                {priority.label}
-              </span>
+              <span className="text-xs text-[var(--muted-foreground)]">{priority.label}</span>
             </div>
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">
               {deal.ownerAvatar}
             </div>
           </div>
 
-          {/* Título */}
-          <h4 className="font-semibold text-sm text-[var(--foreground)] mb-2 line-clamp-2">
+          {/* Cliente */}
+          <p className="text-xs text-[var(--muted-foreground)] mb-1">{deal.client}</p>
+          
+{/* Título del deal */}
+          <h4 className="font-semibold text-sm text-[var(--foreground)] mb-3 line-clamp-2">
             {deal.title}
           </h4>
 
-          {/* Cliente */}
-          <p className="text-xs text-[var(--muted-foreground)] mb-3">
-            {deal.client}
-          </p>
-
           {/* Footer: Valor + Fecha */}
-          <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-            <div className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3 text-[var(--muted-foreground)]" />
-              <span className="text-sm font-semibold text-[var(--foreground)]">
-                ${(deal.value / 1000).toFixed(0)}K
-              </span>
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1 text-[var(--foreground)] font-semibold">
+              <DollarSign className="w-3 h-3" />
+              ${(deal.value / 1000).toFixed(0)}K
             </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-[var(--muted-foreground)]" />
-              <span className="text-xs text-[var(--muted-foreground)]">
-                {new Date(deal.closeDate).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}
-              </span>
+            <div className="flex items-center gap-1 text-[var(--muted-foreground)]">
+              <Calendar className="w-3 h-3" />
+              {new Date(deal.closeDate).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
             </div>
           </div>
         </div>
@@ -273,17 +198,41 @@ function DraggableDealCard({ deal, onClick }: { deal: Deal; onClick: () => void 
 
 export default function ProjectsPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
-  const [deals, setDeals] = useState<Deal[]>(INITIAL_DEALS);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const lastMoveRef = useRef<{dealId: string, stage: string} | null>(null);
 
-  // 🔑 Obtener usuario y rol
+
+  // Hooks - integración con localStorage
   const { user } = useAuth();
   const isDemo = user?.role === "demo";
+  const { deals: storageDeals, addDeal: addDealToStorage, moveDeal } = useDeals();
 
-  // 🌓 Detectar tema dark/light
+  // Convertir deals de storage a formato local
+  const deals = useMemo(() => {
+    return storageDeals.map(d => {
+      const getPriority = (prob: number): Priority => {
+        if (prob >= 70) return "high";
+        if (prob >= 40) return "medium";
+        return "low";
+      };
+
+      return {
+        id: d.id,
+        title: d.title,
+        client: d.client,
+        value: d.value,
+        closeDate: d.expectedCloseDate,
+        priority: getPriority(d.probability),
+        owner: d.owner,
+        ownerAvatar: d.owner.split(' ').map(n => n[0]).join(''),
+        stage: d.stage as Stage
+      };
+    });
+  }, [storageDeals]);
+
+  // Dark mode detection para banner
   const [isDark, setIsDark] = useState(
     document.documentElement.classList.contains('dark')
   );
@@ -301,15 +250,6 @@ export default function ProjectsPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Simular carga inicial
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // DnD Sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -318,95 +258,87 @@ export default function ProjectsPage() {
     })
   );
 
-  // Agrupar deals por stage
-  const dealsByStage = STAGES.map(stage => ({
-    ...stage,
-    deals: deals.filter(d => d.stage === stage.id),
-    totalValue: deals.filter(d => d.stage === stage.id).reduce((sum, d) => sum + d.value, 0)
-  }));
+  // Organizar deals por stage
+  const dealsByStage = useMemo(() => {
+    return STAGES.map(stage => ({
+      ...stage,
+      deals: deals.filter(d => d.stage === stage.id),
+      totalValue: deals
+        .filter(d => d.stage === stage.id)
+        .reduce((sum, d) => sum + d.value, 0)
+    }));
+  }, [deals]);
 
-  // Handler para botón "Nuevo Deal" con validación de demo
-  const handleNewDealClick = () => {
-    if (isDemo) {
-      toast.info("Demo Mode", {
-        description: "La creación de deals está deshabilitada en modo demo"
-      });
-      return;
-    }
-    setIsModalOpen(true);
-  };
-
-  // Handler para botón "Editar Deal" con validación de demo
-  const handleEditClick = () => {
-    if (isDemo) {
-      toast.info("Demo Mode", {
-        description: "La edición de deals está deshabilitada en modo demo"
-      });
-      return;
-    }
-    toast.success("Función en desarrollo");
-  };
+  const totalValue = deals.reduce((sum, d) => sum + d.value, 0);
 
   const handleDragStart = (event: any) => {
     const deal = deals.find(d => d.id === event.active.id);
     setActiveDeal(deal || null);
   };
 
-  const handleDragEnd = (event: any) => {
-    setActiveDeal(null);
-    
-    const { active, over } = event;
-    
+const handleDragOver = (event: { active: { id: string }, over: { id: string } | null }) => {    const { active, over } = event;
     if (!over) return;
-    
-    const activeId = active.id;
-    const overId = over.id;
-    
-    // Si el overId es un stage, mover el deal a ese stage
-    const targetStage = STAGES.find(s => s.id === overId);
-    if (targetStage) {
-      setDeals(prevDeals =>
-        prevDeals.map(deal =>
-          deal.id === activeId
-            ? { ...deal, stage: targetStage.id as Stage }
-            : deal
-        )
-      );
-      return;
+
+    if (isDemo) {
+      return; // Silencioso en drag over, el toast se muestra al soltar
     }
-    
-    // Si el overId es otro deal, reordenar
-    const activeDeal = deals.find(d => d.id === activeId);
-    const overDeal = deals.find(d => d.id === overId);
-    
-    if (!activeDeal || !overDeal) return;
-    
-    // Si están en diferentes stages, mover al stage del over
-    if (activeDeal.stage !== overDeal.stage) {
-      setDeals(prevDeals =>
-        prevDeals.map(deal =>
-          deal.id === activeId
-            ? { ...deal, stage: overDeal.stage }
-            : deal
-        )
-      );
+
+    const activeDealData = deals.find(d => d.id === active.id);
+    if (!activeDealData) return;
+
+    // Buscar el stage sobre el que está el drag
+    const overStage = STAGES.find(s => 
+      deals.some(d => d.id === over.id && d.stage === s.id)
+    );
+
+    if (overStage && activeDealData.stage !== overStage.id) {
+      // Evitar llamadas duplicadas
+      if (lastMoveRef.current?.dealId === active.id && lastMoveRef.current?.stage === overStage.id) {
+        return;
+      }
+      
+      lastMoveRef.current = { dealId: active.id, stage: overStage.id };
+      moveDeal(active.id, overStage.id);
     }
   };
 
-  const handleDealCreated = (newDeal: any) => {
-    const dealToAdd: Deal = {
-      id: Date.now().toString(),
-      title: newDeal.title,
-      client: newDeal.client,
-      value: parseInt(newDeal.value),
-      closeDate: newDeal.closeDate,
-      priority: PRIORITY_MAP[newDeal.priority] || "medium",
-      owner: newDeal.owner,
-      ownerAvatar: newDeal.owner.split(' ').map((n: string) => n[0]).join('').toUpperCase(),
-      stage: STAGE_MAP[newDeal.stage] || "lead"
+const handleDragEnd = () => {
+    if (isDemo && activeDeal) {
+      toast.info("Demo Mode", {
+        description: "No puedes mover deals en modo demo",
+        icon: "🔒"
+      });
+    }
+    setActiveDeal(null);
+    lastMoveRef.current = null; // Reset del último movimiento
+  };
+
+  // Handler para crear nuevo deal desde el modal
+  const handleDealCreated = (newDealFromModal: any) => {
+    if (isDemo) {
+      toast.info("Demo Mode", {
+        description: "La creación de deals está deshabilitada en modo demo"
+      });
+      return;
+    }
+
+    const newDeal = {
+      title: newDealFromModal.title,
+      client: newDealFromModal.client,
+      value: newDealFromModal.value,
+      expectedCloseDate: newDealFromModal.deadline,
+      stage: STAGE_MAP[newDealFromModal.stage] || "lead",
+      probability: newDealFromModal.priority === "Alta" ? 75 : 
+                   newDealFromModal.priority === "Media" ? 50 : 25,
+      owner: newDealFromModal.assignee === "MG" ? "María García" : 
+             newDealFromModal.assignee === "JP" ? "Juan Pérez" : "Ana Silva",
+      notes: newDealFromModal.notes
     };
-    
-    setDeals(prev => [...prev, dealToAdd]);
+
+    addDealToStorage(newDeal);
+    toast.success("Deal creado", {
+      description: `${newDeal.title} agregado al pipeline`
+    });
   };
 
   return (
@@ -415,65 +347,57 @@ export default function ProjectsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--foreground)]">Proyectos</h1>
+          <h1 className="text-3xl font-bold text-[var(--foreground)]">Pipeline de Ventas</h1>
           <p className="text-[var(--muted-foreground)] mt-1">
-            Pipeline de ventas · ${(deals.reduce((sum, d) => sum + d.value, 0) / 1000).toFixed(0)}K total
+            {deals.length} deals activos · ${(totalValue / 1000).toFixed(0)}K total
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
-          {/* Toggle view */}
-          <div className="flex items-center gap-1 bg-[var(--muted)] p-1 rounded-lg">
+          {/* Toggle vista */}
+          <div className="flex items-center gap-1 p-1 bg-[var(--muted)] rounded-lg">
             <button
               onClick={() => setView("kanban")}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+              className={`p-2 rounded transition-colors ${
                 view === "kanban" 
                   ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm" 
                   : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
               }`}
             >
-              <LayoutGrid className="w-4 h-4 inline mr-1" />
-              Kanban
+              <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setView("list")}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+              className={`p-2 rounded transition-colors ${
                 view === "list" 
                   ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm" 
                   : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
               }`}
             >
-              <List className="w-4 h-4 inline mr-1" />
-              Lista
+              <List className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Botón Nuevo Deal con estado demo */}
-          <div className="relative group">
-            <Button 
-              variant="primary" 
-              className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-              onClick={handleNewDealClick}
-            >
-              {isDemo ? <Lock className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-              Nuevo Deal
-            </Button>
-            
-            {/* Tooltip para demo mode */}
-            {isDemo && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                🔒 Deshabilitado en modo demo
-                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-              </div>
-            )}
-          </div>
+          <Button variant="ghost" className="flex items-center gap-2">
+            <Filter className="w-4 h-4" />
+            Filtros
+          </Button>
+          
+          <Button 
+            variant="primary" 
+            className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
+            onClick={() => !isDemo && setIsModalOpen(true)}
+          >
+            {isDemo && <Lock className="w-4 h-4" />}
+            <Plus className="w-4 h-4" />
+            Nuevo Deal
+          </Button>
         </div>
       </div>
 
-      {/* Banner informativo para demo mode - DUAL THEME */}
+      {/* Banner Demo Mode - BI-MODAL */}
       {isDemo && (
         isDark ? (
-          // ====== DARK MODE BANNER ======
           <div className="p-4 bg-blue-900/20 border border-blue-800 rounded-lg flex items-start gap-3">
             <Lock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
@@ -481,12 +405,11 @@ export default function ProjectsPage() {
                 Modo Demo Activo
               </p>
               <p className="text-xs text-blue-300 mt-1">
-                Estás navegando en modo solo lectura. Las funciones de creación y edición están deshabilitadas.
+                Puedes explorar el kanban, pero no puedes mover, crear o editar deals.
               </p>
             </div>
           </div>
         ) : (
-          // ====== LIGHT MODE BANNER ======
           <div className="p-4 rounded-lg flex items-start gap-3" style={{
             backgroundColor: '#e0f2fe',
             border: '2px solid #06b6d4'
@@ -497,84 +420,82 @@ export default function ProjectsPage() {
                 Modo Demo Activo
               </p>
               <p className="text-xs font-medium mt-1" style={{ color: '#1f2937' }}>
-                Estás navegando en modo solo lectura. Las funciones de creación y edición están deshabilitadas.
+                Puedes explorar el kanban, pero no puedes mover, crear o editar deals.
               </p>
             </div>
           </div>
         )
       )}
 
-      {/* Vista Kanban */}
+      {/* Vista Kanban con Drag & Drop */}
       {view === "kanban" && (
-        loading ? (
-          <KanbanSkeleton columns={4} cardsPerColumn={3} />
-        ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {dealsByStage.map((stage) => (
-                <div key={stage.id} className="flex flex-col">
-                  
-                  {/* Header de columna - droppable zone */}
-                  <div 
-                    className="mb-4 p-3 rounded-lg border-2 border-dashed border-transparent hover:border-[var(--border)] transition-colors"
-                    style={{ minHeight: '60px' }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={`w-2 h-2 rounded-full ${stage.color}`} />
-                      <h3 className="font-semibold text-[var(--foreground)]">{stage.name}</h3>
-                      <span className="text-sm text-[var(--muted-foreground)]">
-                        ({stage.deals.length})
-                      </span>
-                    </div>
-                    <p className="text-sm text-[var(--muted-foreground)] flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      ${(stage.totalValue / 1000).toFixed(0)}K
-                    </p>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {dealsByStage.map((stage) => (
+              <div key={stage.id} className="flex flex-col">
+                
+                {/* Header de columna - droppable zone */}
+                <div 
+                  className="mb-4 p-3 rounded-lg border-2 border-dashed border-transparent hover:border-[var(--border)] transition-colors"
+                  style={{ minHeight: '60px' }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={`w-2 h-2 rounded-full ${stage.color}`} />
+                    <h3 className="font-semibold text-[var(--foreground)]">{stage.name}</h3>
+                    <span className="text-sm text-[var(--muted-foreground)]">
+                      ({stage.deals.length})
+                    </span>
                   </div>
-
-                  {/* Cards de deals */}
-                  <SortableContext
-                    items={stage.deals.map(d => d.id)}
-                    strategy={verticalListSortingStrategy}
-                    id={stage.id}
-                  >
-                    <div className="space-y-3 flex-1">
-                      {stage.deals.length === 0 ? (
-                        <Card className="p-6 text-center border-dashed">
-                          <p className="text-sm text-[var(--muted-foreground)]">
-                            Arrastrá deals aquí
-                          </p>
-                        </Card>
-                      ) : (
-                        stage.deals.map(deal => (
-                          <DraggableDealCard 
-                            key={deal.id} 
-                            deal={deal}
-                            onClick={() => setSelectedDeal(deal)}
-                          />
-                        ))
-                      )}
-                    </div>
-                  </SortableContext>
+                  <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    ${(stage.totalValue / 1000).toFixed(0)}K
+                  </p>
                 </div>
-              ))}
-            </div>
 
-            {/* Drag overlay */}
-            <DragOverlay>
-              {activeDeal ? (
-                <Card className="p-3 opacity-90 rotate-3 shadow-xl">
-                  <p className="font-semibold text-sm">{activeDeal.title}</p>
-                </Card>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        )
+                {/* Cards de deals */}
+                <SortableContext
+                  items={stage.deals.map(d => d.id)}
+                  strategy={verticalListSortingStrategy}
+                  id={stage.id}
+                >
+                  <div className="space-y-3 flex-1">
+                    {stage.deals.length === 0 ? (
+                      <Card className="p-8 text-center border-dashed">
+                        <p className="text-sm text-[var(--muted-foreground)]">
+                          {isDemo ? "Sin deals" : "Arrastrá deals aquí"}
+                        </p>
+                      </Card>
+                    ) : (
+                      stage.deals.map(deal => (
+                        <DraggableDealCard 
+                          key={deal.id} 
+                          deal={deal}
+                          onClick={() => setSelectedDeal(deal)}
+                          isDemo={isDemo}
+                        />
+                      ))
+                    )}
+                  </div>
+                </SortableContext>
+              </div>
+            ))}
+          </div>
+
+          {/* Drag overlay */}
+          <DragOverlay>
+            {activeDeal ? (
+              <Card className="p-3 opacity-90 rotate-2 shadow-xl">
+                <p className="font-semibold text-sm">{activeDeal.title}</p>
+              </Card>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* Vista Lista */}
@@ -610,7 +531,7 @@ export default function ProjectsPage() {
                         </span>
                       </td>
                       <td className="py-3">
-                        <Badge variant={deal.priority} isDark={isDark}>{PRIORITY_LABELS[deal.priority].label}</Badge>
+                        <Badge variant={deal.priority}>{PRIORITY_LABELS[deal.priority].label}</Badge>
                       </td>
                       <td className="py-3 font-semibold text-[var(--foreground)]">
                         ${(deal.value / 1000).toFixed(0)}K
@@ -643,7 +564,7 @@ export default function ProjectsPage() {
             <div className="flex items-start justify-between mb-6">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <Badge variant={selectedDeal.priority} isDark={isDark}>
+                  <Badge variant={selectedDeal.priority}>
                     {PRIORITY_LABELS[selectedDeal.priority].label}
                   </Badge>
                   <span className="text-sm text-[var(--muted-foreground)]">
@@ -696,25 +617,9 @@ export default function ProjectsPage() {
               </div>
             </div>
 
-            {/* Acciones con demo mode */}
             <div className="flex gap-3">
-              <div className="relative group flex-1">
-                <Button 
-                  variant="primary" 
-                  className={`w-full ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-                  onClick={handleEditClick}
-                >
-                  {isDemo && <Lock className="w-4 h-4 mr-2" />}
-                  Editar Deal
-                </Button>
-                {isDemo && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    🔒 Deshabilitado en modo demo
-                  </div>
-                )}
-              </div>
-              <Button variant="default" className="flex-1">
-                Ver Actividad
+              <Button variant="primary" className="flex-1" onClick={() => setSelectedDeal(null)}>
+                Cerrar
               </Button>
             </div>
 

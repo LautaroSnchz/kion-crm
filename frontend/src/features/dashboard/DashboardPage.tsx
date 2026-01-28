@@ -12,8 +12,11 @@ import {
   Mail,
   Calendar
 } from "lucide-react";
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line } from "recharts";
 import { MetricCardSkeleton, ChartSkeleton } from "@/components/ui/Skeletons";
+import { getDashboardStats } from "@/lib/storage";
+import { useDeals } from "@/hooks/useDeals";
+import { useClients } from "@/hooks/useClients";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -36,7 +39,7 @@ const Badge = ({ children, variant = "default" }: any) => {
   );
 };
 
-// Data fake
+// Data FAKE para gráfico y actividad (decorativo)
 const REVENUE_DATA = [
   { month: "Ene", revenue: 45000, target: 50000 },
   { month: "Feb", revenue: 52000, target: 55000 },
@@ -44,13 +47,6 @@ const REVENUE_DATA = [
   { month: "Abr", revenue: 61000, target: 60000 },
   { month: "May", revenue: 68000, target: 65000 },
   { month: "Jun", revenue: 75000, target: 70000 },
-];
-
-const PIPELINE_STAGES = [
-  { id: 1, name: "Lead", count: 24, value: "$145K", color: "bg-blue-500", deals: ["Acme Corp", "TechStart", "Global Inc"] },
-  { id: 2, name: "Qualified", count: 18, value: "$320K", color: "bg-purple-500", deals: ["Initech", "Hooli"] },
-  { id: 3, name: "Proposal", count: 12, value: "$280K", color: "bg-orange-500", deals: ["Stark Industries"] },
-  { id: 4, name: "Closed Won", count: 8, value: "$450K", color: "bg-green-500", deals: ["Wayne Enterprises"] },
 ];
 
 const RECENT_ACTIVITY = [
@@ -66,52 +62,88 @@ const TOP_PERFORMERS = [
   { id: 3, name: "Ana Silva", deals: 8, revenue: "$220K", avatar: "AS", trend: "+15%" },
 ];
 
-const QUICK_STATS = [
-  { 
-    label: "Revenue Total", 
-    value: "$892K", 
-    change: "+15.3%", 
-    trend: "up", 
-    icon: DollarSign,
-    color: "text-green-500"
-  },
-  { 
-    label: "Deals Activos", 
-    value: "62", 
-    change: "+8.2%", 
-    trend: "up", 
-    icon: Target,
-    color: "text-blue-500"
-  },
-  { 
-    label: "Clientes Nuevos", 
-    value: "18", 
-    change: "+23.1%", 
-    trend: "up", 
-    icon: Users,
-    color: "text-purple-500"
-  },
-  { 
-    label: "Tasa de Conversión", 
-    value: "32%", 
-    change: "-2.4%", 
-    trend: "down", 
-    icon: TrendingUp,
-    color: "text-orange-500"
-  },
-];
-
 export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState("6m");
   const [loading, setLoading] = useState(true);
+  
+  // 📊 Hooks para datos DINÁMICOS
+  const { deals } = useDeals();
+  const { clients } = useClients();
+  
+  // 📈 Calcular métricas REALES
+  const stats = getDashboardStats();
 
   // Simular carga inicial
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1500);
+    }, 800);
     return () => clearTimeout(timer);
   }, []);
+
+  // Pipeline dinámico por stage (4 STAGES)
+  const pipelineStages = [
+    { 
+      id: 'lead', 
+      name: 'Lead', 
+      color: 'bg-blue-500',
+      deals: deals.filter(d => d.stage === 'lead')
+    },
+    { 
+      id: 'qualified', 
+      name: 'Qualified', 
+      color: 'bg-purple-500',
+      deals: deals.filter(d => d.stage === 'qualified')
+    },
+    { 
+      id: 'proposal', 
+      name: 'Proposal', 
+      color: 'bg-orange-500',
+      deals: deals.filter(d => d.stage === 'proposal')
+    },
+    { 
+      id: 'closed', 
+      name: 'Closed Won', 
+      color: 'bg-green-500',
+      deals: deals.filter(d => d.stage === 'closed')
+    },
+  ];
+
+  // Métricas dinámicas para las cards
+  const quickStats = [
+    { 
+      label: "Revenue Total", 
+      value: `$${(stats.totalRevenue / 1000).toFixed(0)}K`, 
+      change: "+15.3%", 
+      trend: "up", 
+      icon: DollarSign,
+      color: "text-green-500"
+    },
+    { 
+      label: "Deals Activos", 
+      value: stats.activeDeals.toString(), 
+      change: "+8.2%", 
+      trend: "up", 
+      icon: Target,
+      color: "text-blue-500"
+    },
+    { 
+      label: "Clientes Activos", 
+      value: stats.activeClients.toString(), 
+      change: "+23.1%", 
+      trend: "up", 
+      icon: Users,
+      color: "text-purple-500"
+    },
+    { 
+      label: "Win Rate", 
+      value: `${stats.winRate}%`, 
+      change: stats.winRate >= 50 ? "+2.4%" : "-2.4%", 
+      trend: stats.winRate >= 50 ? "up" : "down", 
+      icon: TrendingUp,
+      color: "text-orange-500"
+    },
+  ];
 
   return (
     <div className="p-6 space-y-6 bg-[var(--background)] min-h-screen">
@@ -131,7 +163,7 @@ export default function DashboardPage() {
               onClick={() => setSelectedPeriod(period)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedPeriod === period
-                  ? "bg-[var(--primary)] text-white shadow-md"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30"
                   : "bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]/80"
               }`}
             >
@@ -141,7 +173,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Stats CON SKELETON */}
+      {/* Quick Stats DINÁMICAS */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -150,7 +182,7 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {QUICK_STATS.map((stat) => (
+          {quickStats.map((stat) => (
             <Card key={stat.label} className="p-5 hover:shadow-lg transition-all cursor-pointer group">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -177,10 +209,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Revenue Chart & Pipeline CON SKELETON */}
+      {/* Revenue Chart & Top Performers */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Revenue Chart */}
+        {/* Revenue Chart (DECORATIVO - histórico simulado) */}
         {loading ? (
           <div className="lg:col-span-2">
             <ChartSkeleton />
@@ -233,7 +265,7 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {/* Top Performers */}
+        {/* Top Performers (DECORATIVO) */}
         {loading ? (
           <Card className="p-6">
             <div className="h-6 bg-[var(--muted-foreground)]/20 rounded animate-pulse w-32 mb-4" />
@@ -286,47 +318,57 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Pipeline Visual */}
+      {/* Pipeline Visual DINÁMICO */}
       {!loading && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-[var(--foreground)] mb-6">Sales Pipeline</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {PIPELINE_STAGES.map((stage) => (
-              <div 
-                key={stage.id} 
-                className="group cursor-pointer"
-              >
-                <div className="p-4 rounded-lg bg-[var(--muted)] hover:bg-[var(--muted)]/70 transition-all">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-[var(--foreground)]">{stage.name}</h4>
-                    <div className={`w-2 h-2 rounded-full ${stage.color}`}></div>
-                  </div>
-                  <p className="text-2xl font-bold text-[var(--foreground)] mb-1">{stage.count}</p>
-                  <p className="text-sm text-[var(--muted-foreground)] mb-3">{stage.value}</p>
-                  
-                  <div className="space-y-2">
-                    {stage.deals.slice(0, 2).map((deal, idx) => (
-                      <div 
-                        key={idx}
-                        className="text-xs px-2 py-1 rounded bg-[var(--background)] text-[var(--foreground)] truncate"
-                      >
-                        {deal}
-                      </div>
-                    ))}
-                    {stage.deals.length > 2 && (
-                      <div className="text-xs text-[var(--muted-foreground)]">
-                        +{stage.deals.length - 2} más
-                      </div>
-                    )}
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {pipelineStages.map((stage) => {
+              const stageValue = stage.deals.reduce((sum, d) => sum + d.value, 0);
+              return (
+                <div 
+                  key={stage.id} 
+                  className="group cursor-pointer"
+                >
+                  <div className="p-4 rounded-lg bg-[var(--muted)] hover:bg-[var(--muted)]/70 transition-all">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-sm text-[var(--foreground)]">{stage.name}</h4>
+                      <div className={`w-2 h-2 rounded-full ${stage.color}`}></div>
+                    </div>
+                    <p className="text-2xl font-bold text-[var(--foreground)] mb-1">{stage.deals.length}</p>
+                    <p className="text-sm text-[var(--muted-foreground)] mb-3">
+                      ${(stageValue / 1000).toFixed(0)}K
+                    </p>
+                    
+                    <div className="space-y-2">
+                      {stage.deals.slice(0, 2).map((deal, idx) => (
+                        <div 
+                          key={idx}
+                          className="text-xs px-2 py-1 rounded bg-[var(--background)] text-[var(--foreground)] truncate"
+                        >
+                          {deal.title}
+                        </div>
+                      ))}
+                      {stage.deals.length > 2 && (
+                        <div className="text-xs text-[var(--muted-foreground)]">
+                          +{stage.deals.length - 2} más
+                        </div>
+                      )}
+                      {stage.deals.length === 0 && (
+                        <div className="text-xs text-[var(--muted-foreground)] italic">
+                          Sin deals
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       )}
 
-      {/* Recent Activity */}
+      {/* Recent Activity (DECORATIVO) */}
       {!loading && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-[var(--foreground)] mb-6">Actividad Reciente</h3>

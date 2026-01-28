@@ -5,7 +5,6 @@ import {
   logout as logoutFn, 
   login as loginFn,
   loginAsDemo as loginAsDemoFn,
-
   type User 
 } from "@/lib/auth";
 
@@ -15,9 +14,18 @@ export function useAuth() {
 
   // Cargar usuario al montar
   useEffect(() => {
+    let isMounted = true;
+    
     const currentUser = getAuth();
-    setUser(currentUser);
-    setLoading(false);
+    
+    if (isMounted) {
+      setUser(currentUser);
+      setLoading(false);
+    }
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Login memoizado

@@ -18,6 +18,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -196,6 +197,28 @@ function DraggableDealCard({ deal, onClick, isDemo }: { deal: Deal; onClick: () 
   );
 }
 
+// Área droppable para columnas vacías - CON ALTURA GARANTIZADA
+function DroppableEmptyArea({ stageId, isDemo }: { stageId: string; isDemo: boolean }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: stageId,
+  });
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      className={`min-h-[300px] flex items-center justify-center transition-colors ${
+        isOver ? 'bg-[var(--muted)]/50' : ''
+      }`}
+    >
+      <Card className="w-full p-8 text-center border-dashed">
+        <p className="text-sm text-[var(--muted-foreground)]">
+          {isDemo ? "Sin deals" : "Arrastrá deals aquí"}
+        </p>
+      </Card>
+    </div>
+  );
+}
+
 export default function ProjectsPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
@@ -276,29 +299,40 @@ export default function ProjectsPage() {
     setActiveDeal(deal || null);
   };
 
-const handleDragOver = (event: { active: { id: string }, over: { id: string } | null }) => {    const { active, over } = event;
-    if (!over) return;
-
-    if (isDemo) {
-      return; // Silencioso en drag over, el toast se muestra al soltar
+const handleDragOver = (event: { active: { id: string }, over: { id: string } | null }) => {
+    const { active, over } = event;
+    if (!over) {
+      lastMoveRef.current = null;
+      return;
     }
 
-    const activeDealData = deals.find(d => d.id === active.id);
+    if (isDemo) {
+      return;
+    }
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    const activeDealData = deals.find(d => d.id === activeId);
     if (!activeDealData) return;
 
-    // Buscar el stage sobre el que está el drag
-    const overStage = STAGES.find(s => 
-      deals.some(d => d.id === over.id && d.stage === s.id)
-    );
+    // 1. Verificar si overId ES una columna (stage) directamente
+    const isOverAStage = STAGES.some(s => s.id === overId);
+    
+    // 2. Si es stage, usar ese ID. Si es deal, buscar su stage.
+    const overStageId = isOverAStage 
+      ? overId 
+      : deals.find(d => d.id === overId)?.stage;
 
-    if (overStage && activeDealData.stage !== overStage.id) {
+    // 3. Guardar para mover en handleDragEnd
+    if (overStageId && activeDealData.stage !== overStageId) {
       // Evitar llamadas duplicadas
-      if (lastMoveRef.current?.dealId === active.id && lastMoveRef.current?.stage === overStage.id) {
+      if (lastMoveRef.current?.dealId === activeId && lastMoveRef.current?.stage === overStageId) {
         return;
       }
       
-      lastMoveRef.current = { dealId: active.id, stage: overStage.id };
-      moveDeal(active.id, overStage.id);
+      lastMoveRef.current = { dealId: activeId, stage: overStageId };
+      moveDeal(activeId, overStageId);
     }
   };
 
@@ -460,17 +494,14 @@ const handleDragEnd = () => {
 
                 {/* Cards de deals */}
                 <SortableContext
+                  key={`${stage.id}-${stage.deals.length}`}
                   items={stage.deals.map(d => d.id)}
                   strategy={verticalListSortingStrategy}
                   id={stage.id}
                 >
                   <div className="space-y-3 flex-1">
                     {stage.deals.length === 0 ? (
-                      <Card className="p-8 text-center border-dashed">
-                        <p className="text-sm text-[var(--muted-foreground)]">
-                          {isDemo ? "Sin deals" : "Arrastrá deals aquí"}
-                        </p>
-                      </Card>
+                      <DroppableEmptyArea stageId={stage.id} isDemo={isDemo} />
                     ) : (
                       stage.deals.map(deal => (
                         <DraggableDealCard 

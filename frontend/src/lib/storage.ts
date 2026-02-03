@@ -31,56 +31,110 @@ const STORAGE_KEYS = {
   INITIALIZED: 'kioncrm_initialized'
 };
 
+// 9 CLIENTES - Mix de estados para realismo
 const INITIAL_CLIENTS: Client[] = [
   {
     id: '1',
-    name: 'Acme Corporation',
-    email: 'contact@acme.com',
-    phone: '+1 (555) 123-4567',
-    company: 'Acme Corp',
+    name: 'Acme SA',
+    email: 'contact@acmesa.com',
+    phone: '+54 11 4567-8900',
+    company: 'Acme Corporation',
     status: 'active',
-    value: 125000,
+    value: 45000,
     createdAt: '2024-01-15',
     lastContact: '2024-01-16',
-    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Acme'
   },
   {
     id: '2',
-    name: 'TechStart Inc',
-    email: 'hello@techstart.io',
-    phone: '+1 (555) 234-5678',
-    company: 'TechStart',
+    name: 'Initech',
+    email: 'info@initech.com',
+    phone: '+54 11 4567-8901',
+    company: 'Initech Solutions',
     status: 'active',
-    value: 85000,
+    value: 12000,
     createdAt: '2024-01-10',
     lastContact: '2024-01-17',
-    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=TechStart'
   },
   {
     id: '3',
-    name: 'Global Solutions',
-    email: 'info@globalsolutions.com',
-    phone: '+1 (555) 345-6789',
-    company: 'Global Solutions Ltd',
-    status: 'prospect',
-    value: 250000,
+    name: 'Globex Corp',
+    email: 'sales@globex.com',
+    phone: '+54 11 4567-8902',
+    company: 'Globex Industries',
+    status: 'active',
+    value: 89000,
     createdAt: '2024-01-18',
-    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Global'
+    lastContact: '2024-01-18',
   },
   {
     id: '4',
-    name: 'Innovation Labs',
-    email: 'contact@innovationlabs.com',
-    phone: '+1 (555) 456-7890',
-    company: 'Innovation Labs',
+    name: 'Wayne Enterprises',
+    email: 'bruce@wayne.com',
+    phone: '+54 11 4567-8903',
+    company: 'Wayne Corp',
     status: 'active',
-    value: 175000,
+    value: 34000,
     createdAt: '2024-01-05',
     lastContact: '2024-01-16',
-    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Innovation'
+  },
+  {
+    id: '5',
+    name: 'Umbrella Co',
+    email: 'contact@umbrella.com',
+    phone: '+54 11 4567-8904',
+    company: 'Umbrella Corporation',
+    status: 'active',
+    value: 67000,
+    createdAt: '2024-01-08',
+    lastContact: '2024-01-15',
+  },
+  {
+    id: '6',
+    name: 'Stark Industries',
+    email: 'tony@stark.com',
+    phone: '+54 11 4567-8905',
+    company: 'Stark Industries Inc',
+    status: 'active',
+    value: 125000,
+    createdAt: '2024-01-19',
+    lastContact: 'Hoy',
+  },
+  {
+    id: '7',
+    name: 'Cyberdyne Systems',
+    email: 'info@cyberdyne.com',
+    phone: '+54 11 4567-8906',
+    company: 'Cyberdyne Corp',
+    status: 'prospect',
+    value: 0,
+    createdAt: '2024-01-20',
+    lastContact: 'Hace 3 días',
+  },
+  {
+    id: '8',
+    name: 'Tyrell Corporation',
+    email: 'contact@tyrell.com',
+    phone: '+54 11 4567-8907',
+    company: 'Tyrell Inc',
+    status: 'prospect',
+    value: 0,
+    createdAt: '2024-01-22',
+    lastContact: 'Hace 1 semana',
+  },
+  {
+    id: '9',
+    name: 'Weyland-Yutani',
+    email: 'sales@weyland.com',
+    phone: '+54 11 4567-8908',
+    company: 'Weyland-Yutani Corp',
+    status: 'inactive',
+    value: 0,
+    createdAt: '2023-11-15',
+    lastContact: 'Hace 2 meses',
   }
 ];
 
+// 6 DEALS - Ahora coinciden con los clientes de arriba
 const INITIAL_DEALS: Deal[] = [
   {
     id: '1',
@@ -102,7 +156,7 @@ const INITIAL_DEALS: Deal[] = [
     probability: 20,
     expectedCloseDate: '2025-03-09',
     createdAt: '2024-01-12',
-    owner: 'Ana Silva'
+    owner: 'Orion Castillo'
   },
   {
     id: '3',
@@ -124,7 +178,7 @@ const INITIAL_DEALS: Deal[] = [
     probability: 50,
     expectedCloseDate: '2025-02-04',
     createdAt: '2024-01-05',
-    owner: 'Ana Silva'
+    owner: 'Orion Castillo'
   },
   {
     id: '5',

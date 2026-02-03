@@ -1,20 +1,25 @@
-// components/modals/DealModal.tsx
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import type { Deal } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
+import { useClients } from '@/hooks/useClients';
+import { toast } from 'sonner';
 
 interface DealModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (deal: Omit<Deal, 'id' | 'createdAt'>) => void;
+  onSave: (dealId: string, updates: Partial<Deal>) => void;
+  onDelete?: (dealId: string) => void;
   editDeal?: Deal;
-  clients: string[]; // Lista de nombres de clientes disponibles
 }
 
-export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealModalProps) {
+export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealModalProps) {
   const { user } = useAuth();
   const isDemo = user?.role === 'demo';
+  
+  // Clientes dinámicos desde localStorage
+  const { clients } = useClients();
+  const clientNames = clients.map(c => c.name);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -26,6 +31,8 @@ export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealMo
     owner: user?.name || 'Admin User',
     notes: ''
   });
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (editDeal) {
@@ -39,52 +46,64 @@ export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealMo
         owner: editDeal.owner,
         notes: editDeal.notes || ''
       });
-    } else {
-      resetForm();
     }
-  }, [editDeal, isOpen, user]);
-
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      client: clients[0] || '',
-      value: 0,
-      stage: 'lead',
-      probability: 20,
-      expectedCloseDate: '',
-      owner: user?.name || 'Admin User',
-      notes: ''
-    });
-  };
+  }, [editDeal, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (isDemo) {
-      alert('Demo mode: Changes are not saved');
+      toast.info('Demo Mode', {
+        description: 'Los cambios no se guardan en modo demo',
+        icon: '🔒'
+      });
       return;
     }
 
-    onSave(formData);
-    resetForm();
+    if (!editDeal) return;
+
+    onSave(editDeal.id, formData);
+    toast.success('Deal actualizado', {
+      description: `${formData.title} se actualizó correctamente`
+    });
     onClose();
   };
 
-  if (!isOpen) return null;
+  const handleDelete = () => {
+    if (isDemo) {
+      toast.info('Demo Mode', {
+        description: 'No puedes eliminar deals en modo demo',
+        icon: '🔒'
+      });
+      setShowDeleteConfirm(false);
+      return;
+    }
+
+    if (!editDeal || !onDelete) return;
+
+    onDelete(editDeal.id);
+    toast.success('Deal eliminado', {
+      description: `${editDeal.title} fue eliminado`
+    });
+    setShowDeleteConfirm(false);
+    onClose();
+  };
+
+  if (!isOpen || !editDeal) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            {editDeal ? 'Edit Deal' : 'New Deal'}
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
+          <h2 className="text-xl font-bold text-[var(--foreground)]">
+            Editar Deal
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--muted)] rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -92,7 +111,7 @@ export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealMo
         {isDemo && (
           <div className="mx-6 mt-4 p-3 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 rounded-lg">
             <p className="text-sm text-cyan-700 dark:text-cyan-300">
-              <strong>Demo Mode:</strong> Changes won't be saved
+              <strong>Demo Mode:</strong> Los cambios no se guardarán
             </p>
           </div>
         )}
@@ -101,36 +120,36 @@ export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealMo
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Deal Title *
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+              Título del deal *
             </label>
             <input
               type="text"
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg 
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
-              placeholder="Enterprise Software License"
+              className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
+                       bg-[var(--input)] text-[var(--foreground)]
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+              placeholder="Migración Cloud Platform"
             />
           </div>
 
-          {/* Client */}
+          {/* Client - DINÁMICO */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Client *
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+              Cliente *
             </label>
             <select
               required
               value={formData.client}
               onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg 
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
+                       bg-[var(--input)] text-[var(--foreground)]
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
             >
-              <option value="">Select a client</option>
-              {clients.map(client => (
+              <option value="">Seleccionar cliente</option>
+              {clientNames.map(client => (
                 <option key={client} value={client}>{client}</option>
               ))}
             </select>
@@ -138,8 +157,8 @@ export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealMo
 
           {/* Value */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Deal Value ($) *
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+              Valor (USD) *
             </label>
             <input
               type="number"
@@ -148,24 +167,24 @@ export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealMo
               step="1000"
               value={formData.value}
               onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg 
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
+                       bg-[var(--input)] text-[var(--foreground)]
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
               placeholder="50000"
             />
           </div>
 
           {/* Stage */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Stage
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+              Etapa
             </label>
             <select
               value={formData.stage}
               onChange={(e) => setFormData({ ...formData, stage: e.target.value as Deal['stage'] })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg 
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
+                       bg-[var(--input)] text-[var(--foreground)]
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
             >
               <option value="lead">Lead</option>
               <option value="qualified">Qualified</option>
@@ -176,8 +195,8 @@ export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealMo
 
           {/* Probability */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Probability: {formData.probability}%
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+              Probabilidad: {formData.probability}%
             </label>
             <input
               type="range"
@@ -186,63 +205,109 @@ export function DealModal({ isOpen, onClose, onSave, editDeal, clients }: DealMo
               step="5"
               value={formData.probability}
               onChange={(e) => setFormData({ ...formData, probability: parseInt(e.target.value) })}
-              className="w-full"
+              className="w-full accent-cyan-500"
             />
           </div>
 
           {/* Expected Close Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Expected Close Date
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+              Fecha de cierre estimada
             </label>
             <input
               type="date"
               value={formData.expectedCloseDate}
               onChange={(e) => setFormData({ ...formData, expectedCloseDate: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg 
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
+                       bg-[var(--input)] text-[var(--foreground)]
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Notes
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+              Notas
             </label>
             <textarea
               rows={3}
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg 
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
-              placeholder="Additional information about this deal..."
+              className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
+                       bg-[var(--input)] text-[var(--foreground)]
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-none"
+              placeholder="Información adicional sobre este deal..."
             />
           </div>
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 
-                       text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 
-                       dark:hover:bg-slate-700 transition-colors font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 
-                       hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg 
-                       transition-colors font-medium shadow-lg shadow-cyan-500/30"
-            >
-              {editDeal ? 'Update' : 'Create'} Deal
-            </button>
+            {/* Botón Eliminar */}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="px-4 py-2 border border-red-300 dark:border-red-800 
+                         text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 
+                         dark:hover:bg-red-900/20 transition-colors font-medium flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Eliminar
+              </button>
+            )}
+
+            <div className="flex-1 flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-[var(--border)] 
+                         text-[var(--foreground)] rounded-lg hover:bg-[var(--muted)] 
+                         transition-colors font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 
+                         hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg 
+                         transition-colors font-medium shadow-lg shadow-cyan-500/30"
+              >
+                Guardar
+              </button>
+            </div>
           </div>
         </form>
       </div>
+
+      {/* Confirmación de eliminación */}
+      {showDeleteConfirm && (
+        <div className="absolute inset-0 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">
+              ¿Eliminar deal?
+            </h3>
+            <p className="text-sm text-[var(--muted-foreground)] mb-4">
+              Esta acción no se puede deshacer. El deal "{editDeal.title}" será eliminado permanentemente.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 border border-[var(--border)] rounded-lg 
+                         hover:bg-[var(--muted)] transition-colors font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white 
+                         rounded-lg transition-colors font-medium"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

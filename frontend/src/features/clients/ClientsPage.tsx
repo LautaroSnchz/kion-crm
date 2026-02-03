@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Search, UserPlus, Mail, Phone, Building, X, ChevronLeft, ChevronRight, Lock, Info } from "lucide-react";
+import { Search, UserPlus, Mail, Phone, Building, X, ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { NewClientModal } from "@/components/modals";
+import { ClientModal } from "@/components/modals/ClientModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useClients } from "@/hooks/useClients";
 import { toast } from "sonner";
 import { TableSkeleton } from "@/components/ui/Skeletons";
+import { useDeals } from "@/hooks/useDeals";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -13,7 +15,7 @@ const Card = ({ className = "", children }: any) => (
   </div>
 );
 
-const Button = ({ className = "", children, variant = "default", ...props }: any) => {
+const Button = ({ className = "", children, variant = "default", ...props }: { className?: string; children: any; variant?: 'default' | 'primary' | 'ghost'; [key: string]: any }) => {
   const variants = {
     default: "px-4 py-2 rounded-md font-medium transition-all bg-[var(--muted)] hover:bg-[var(--muted)]/80",
     primary: "btn-kion",
@@ -64,15 +66,20 @@ export default function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
+
+
+const { deals } = useDeals();
+
 
   // 🔑 Obtener usuario y rol
   const { user } = useAuth();
   const isDemo = user?.role === "demo";
 
   // 📦 Hook de localStorage para clientes
-  const { clients, addClient } = useClients();
+  const { clients, addClient, updateClient, deleteClient } = useClients();
 
   // 🌓 Detectar tema dark/light
   const [isDark, setIsDark] = useState(
@@ -119,6 +126,20 @@ export default function ClientsPage() {
     });
   };
 
+  // Handler para actualizar cliente
+  const handleClientUpdate = (clientId: string, updates: any) => {
+    updateClient(clientId, updates);
+    setSelectedClient(null);
+    setIsEditModalOpen(false);
+  };
+
+  // Handler para eliminar cliente
+  const handleClientDelete = (clientId: string) => {
+    deleteClient(clientId);
+    setSelectedClient(null);
+    setIsEditModalOpen(false);
+  };
+
   // Handler para botón "Nuevo Cliente" con validación de demo
   const handleNewClientClick = () => {
     if (isDemo) {
@@ -128,17 +149,6 @@ export default function ClientsPage() {
       return;
     }
     setIsModalOpen(true);
-  };
-
-  // Handler para botón "Editar Cliente" con validación de demo
-  const handleEditClick = () => {
-    if (isDemo) {
-      toast.info("Demo Mode", {
-        description: "La edición de clientes está deshabilitada en modo demo"
-      });
-      return;
-    }
-    toast.success("Función en desarrollo");
   };
 
   return (
@@ -282,15 +292,17 @@ export default function ClientsPage() {
                       </td>
                       <td className="p-4">
                         <Badge 
-                          variant={client.status === "active" ? "success" : "warning"}
+                          variant={client.status === "active" ? "success" : client.status === "prospect" ? "warning" : "default"}
                           isDark={isDark}
                         >
-                          {client.status === "active" ? "Activo" : "Pendiente"}
+                        {client.status === "active" ? "Activo" : client.status === "prospect" ? "Prospect" : "Inactivo"}
                         </Badge>
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-[var(--foreground)]">{client.deals}</span>
+                          <span className="font-medium text-[var(--foreground)]">
+                      {deals.filter(d => d.client === client.name).length}
+                      </span>
                           <span className="text-xs text-[var(--muted-foreground)]">deals</span>
                         </div>
                       </td>
@@ -362,13 +374,13 @@ export default function ClientsPage() {
 
             <div className="space-y-6">
               
-              {/* Estado */}
+{/* Estado */}
               <div>
                 <Badge 
-                  variant={selectedClient.status === "active" ? "success" : "warning"}
+                  variant={selectedClient.status === "active" ? "success" : selectedClient.status === "prospect" ? "warning" : "default"}
                   isDark={isDark}
                 >
-                  {selectedClient.status === "active" ? "Cliente Activo" : "Pendiente"}
+                  {selectedClient.status === "active" ? "Cliente Activo" : selectedClient.status === "prospect" ? "Prospect" : "Inactivo"}
                 </Badge>
               </div>
 
@@ -421,7 +433,15 @@ export default function ClientsPage() {
                   <Button 
                     variant="primary" 
                     className={`w-full ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-                    onClick={handleEditClick}
+                    onClick={() => {
+                      if (isDemo) {
+                        toast.info("Demo Mode", {
+                          description: "No puedes editar clientes en modo demo"
+                        });
+                        return;
+                      }
+                      setIsEditModalOpen(true);
+                    }}
                   >
                     {isDemo && <Lock className="w-4 h-4 mr-2" />}
                     Editar Cliente
@@ -440,6 +460,17 @@ export default function ClientsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de edición de cliente */}
+      {selectedClient && (
+        <ClientModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleClientUpdate}
+          onDelete={handleClientDelete}
+          editClient={clients.find(c => c.id === selectedClient.id)}
+        />
       )}
 
       {/* Modal Nuevo Cliente */}

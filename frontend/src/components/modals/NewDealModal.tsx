@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useClients } from "@/hooks/useClients";
 
 interface NewDealModalProps {
   open: boolean;
@@ -10,12 +11,11 @@ interface NewDealModalProps {
   onDealCreated: (deal: any) => void;
 }
 
-const CLIENTS = ["Acme SA", "Globex Corp", "Initech", "Umbrella Co", "Stark Industries", "Wayne Enterprises"];
 const PRIORITIES = ["Alta", "Media", "Baja"];
 const ASSIGNEES = [
-  { id: "MG", name: "María González" },
-  { id: "JP", name: "Juan Pérez" },
-  { id: "AS", name: "Ana Silva" }
+  { id: "SB", name: "Simon Belmont" },
+  { id: "SM", name: "Sofía Márquez" },
+  { id: "OC", name: "Orion Castillo" }
 ];
 const STAGES = ["Lead", "Qualified", "Proposal", "Closed Won"];
 
@@ -32,6 +32,10 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // 🔥 DINÁMICO: Cargar clientes desde localStorage
+  const { clients } = useClients();
+  const clientNames = clients.map(c => c.name);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -78,7 +82,8 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
         title: formData.title,
         value: Number(formData.value),
         date: new Date(formData.deadline).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }),
-        assignee: formData.assignee
+        assignee: formData.assignee,
+        deadline: formData.deadline
       };
 
       onDealCreated(newDeal);
@@ -116,7 +121,7 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
 
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* Cliente */}
+          {/* Cliente - DINÁMICO */}
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
               Cliente <span className="text-red-500">*</span>
@@ -130,7 +135,7 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
               }`}
             >
               <option value="">Seleccionar cliente...</option>
-              {CLIENTS.map(client => (
+              {clientNames.map(client => (
                 <option key={client} value={client}>{client}</option>
               ))}
             </select>

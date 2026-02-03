@@ -16,7 +16,6 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { MetricCardSkeleton, ChartSkeleton } from "@/components/ui/Skeletons";
 import { getDashboardStats } from "@/lib/storage";
 import { useDeals } from "@/hooks/useDeals";
-import { useClients } from "@/hooks/useClients";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -25,7 +24,7 @@ const Card = ({ className = "", children }: any) => (
   </div>
 );
 
-const Badge = ({ children, variant = "default" }: any) => {
+const Badge = ({ children, variant = "default" }: { children: any; variant?: 'default' | 'success' | 'warning' | 'info' }) => {
   const variants = {
     default: "bg-[var(--muted)] text-[var(--muted-foreground)]",
     success: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
@@ -57,9 +56,9 @@ const RECENT_ACTIVITY = [
 ];
 
 const TOP_PERFORMERS = [
-  { id: 1, name: "María González", deals: 12, revenue: "$340K", avatar: "MG", trend: "+23%" },
-  { id: 2, name: "Juan Pérez", deals: 10, revenue: "$285K", avatar: "JP", trend: "+18%" },
-  { id: 3, name: "Ana Silva", deals: 8, revenue: "$220K", avatar: "AS", trend: "+15%" },
+  { id: 1, name: "Simon Belmont", deals: 12, revenue: "$340K", avatar: "MG", trend: "+23%" },
+  { id: 2, name: "Sofía Márquez", deals: 10, revenue: "$285K", avatar: "JP", trend: "+18%" },
+  { id: 3, name: "Orion Castillo", deals: 8, revenue: "$220K", avatar: "AS", trend: "+15%" },
 ];
 
 export default function DashboardPage() {
@@ -68,7 +67,6 @@ export default function DashboardPage() {
   
   // 📊 Hooks para datos DINÁMICOS
   const { deals } = useDeals();
-  const { clients } = useClients();
   
   // 📈 Calcular métricas REALES
   const stats = getDashboardStats();

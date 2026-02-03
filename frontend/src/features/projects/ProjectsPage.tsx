@@ -6,7 +6,6 @@ import {
   Plus,
   DollarSign,
   Calendar,
-  X,
   TrendingUp,
   GripVertical,
   Lock
@@ -27,6 +26,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { NewDealModal } from "@/components/modals";
+import { DealModal } from "@/components/modals/DealModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeals } from "@/hooks/useDeals";
 import { toast } from "sonner";
@@ -38,7 +38,7 @@ const Card = ({ className = "", children }: any) => (
   </div>
 );
 
-const Button = ({ className = "", children, variant = "default", ...props }: any) => {
+const Button = ({ className = "", children, variant = "default", ...props }: { className?: string; children: any; variant?: 'default' | 'primary' | 'ghost'; [key: string]: any }) => {
   const variants = {
     default: "px-4 py-2 rounded-md font-medium transition-all bg-[var(--muted)] hover:bg-[var(--muted)]/80",
     primary: "btn-kion",
@@ -51,14 +51,15 @@ const Button = ({ className = "", children, variant = "default", ...props }: any
   );
 };
 
-const Badge = ({ children, variant = "default" }: any) => {
+const Badge = ({ children, variant = "default" }: { children:React.ReactNode; variant?: 'high' | 'medium' | 'low' | 'default' }) => {
   const variants = {
     high: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
     medium: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
     low: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
+    default: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200 dark:border-gray-800",
   };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${variants[variant] || variants.high}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${variants[variant]}`}>
       {children}
     </span>
   );
@@ -91,13 +92,6 @@ const PRIORITY_LABELS = {
   high: { label: "Alta", dot: "bg-red-500" },
   medium: { label: "Media", dot: "bg-yellow-500" },
   low: { label: "Baja", dot: "bg-green-500" },
-};
-
-// Helper para mapear prioridades del modal a las del kanban
-const PRIORITY_MAP: Record<string, Priority> = {
-  "Alta": "high",
-  "Media": "medium",
-  "Baja": "low"
 };
 
 // Helper para mapear stages del modal a las del kanban
@@ -136,7 +130,6 @@ function DraggableDealCard({ deal, onClick, isDemo }: { deal: Deal; onClick: () 
         className={`p-3 hover:shadow-md transition-all group relative ${
           isDemo ? 'cursor-not-allowed' : 'cursor-pointer'
         }`}
-        onClick={onClick}
         title={isDemo ? "🔒 Modo demo - No se pueden editar deals" : ""}
       >
         {/* Overlay de demo mode en hover */}
@@ -155,12 +148,13 @@ function DraggableDealCard({ deal, onClick, isDemo }: { deal: Deal; onClick: () 
             {...attributes}
             {...listeners}
             className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10"
+            onClick={(e) => e.stopPropagation()}
           >
             <GripVertical className="w-4 h-4 text-[var(--muted-foreground)]" />
           </div>
         )}
 
-        <div className="pl-3">
+        <div className="pl-3" onClick={onClick}>
           {/* Header: Prioridad + Avatar */}
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-1.5">
@@ -230,7 +224,7 @@ export default function ProjectsPage() {
   // Hooks - integración con localStorage
   const { user } = useAuth();
   const isDemo = user?.role === "demo";
-  const { deals: storageDeals, addDeal: addDealToStorage, moveDeal } = useDeals();
+  const { deals: storageDeals, addDeal: addDealToStorage, moveDeal, updateDeal, deleteDeal } = useDeals();
 
   // Convertir deals de storage a formato local
   const deals = useMemo(() => {
@@ -299,7 +293,7 @@ export default function ProjectsPage() {
     setActiveDeal(deal || null);
   };
 
-const handleDragOver = (event: { active: { id: string }, over: { id: string } | null }) => {
+const handleDragOver = (event: any) => {
     const { active, over } = event;
     if (!over) {
       lastMoveRef.current = null;
@@ -310,8 +304,8 @@ const handleDragOver = (event: { active: { id: string }, over: { id: string } | 
       return;
     }
 
-    const activeId = active.id;
-    const overId = over.id;
+    const activeId = String(active.id);
+    const overId = String(over.id);
 
     const activeDealData = deals.find(d => d.id === activeId);
     if (!activeDealData) return;
@@ -332,7 +326,7 @@ const handleDragOver = (event: { active: { id: string }, over: { id: string } | 
       }
       
       lastMoveRef.current = { dealId: activeId, stage: overStageId };
-      moveDeal(activeId, overStageId);
+      moveDeal(activeId, overStageId as Deal['stage']);
     }
   };
 
@@ -373,6 +367,18 @@ const handleDragEnd = () => {
     toast.success("Deal creado", {
       description: `${newDeal.title} agregado al pipeline`
     });
+  };
+
+  // Handler para actualizar deal desde el modal
+  const handleDealUpdate = (dealId: string, updates: Partial<Deal>) => {
+    updateDeal(dealId, updates);
+    setSelectedDeal(null);
+  };
+
+  // Handler para eliminar deal desde el modal
+  const handleDealDelete = (dealId: string) => {
+    deleteDeal(dealId);
+    setSelectedDeal(null);
   };
 
   return (
@@ -587,75 +593,15 @@ const handleDragEnd = () => {
         </Card>
       )}
 
-      {/* Modal de detalle */}
+      {/* Modal de edición de deal */}
       {selectedDeal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
-            
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <Badge variant={selectedDeal.priority}>
-                    {PRIORITY_LABELS[selectedDeal.priority].label}
-                  </Badge>
-                  <span className="text-sm text-[var(--muted-foreground)]">
-                    {STAGES.find(s => s.id === selectedDeal.stage)?.name}
-                  </span>
-                </div>
-                <h2 className="text-2xl font-bold text-[var(--foreground)]">{selectedDeal.title}</h2>
-                <p className="text-[var(--muted-foreground)] mt-1">{selectedDeal.client}</p>
-              </div>
-              <button
-                onClick={() => setSelectedDeal(null)}
-                className="p-2 hover:bg-[var(--muted)] rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <Card className="p-4">
-                <div className="flex items-center gap-2 text-[var(--muted-foreground)] mb-1">
-                  <DollarSign className="w-4 h-4" />
-                  <span className="text-sm">Valor del deal</span>
-                </div>
-                <p className="text-2xl font-bold text-[var(--foreground)]">
-                  ${selectedDeal.value.toLocaleString()}
-                </p>
-              </Card>
-
-              <Card className="p-4">
-                <div className="flex items-center gap-2 text-[var(--muted-foreground)] mb-1">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">Fecha de cierre</span>
-                </div>
-                <p className="text-2xl font-bold text-[var(--foreground)]">
-                  {new Date(selectedDeal.closeDate).toLocaleDateString('es-AR')}
-                </p>
-              </Card>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="font-semibold text-[var(--foreground)] mb-3">Responsable</h3>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold">
-                  {selectedDeal.ownerAvatar}
-                </div>
-                <div>
-                  <p className="font-medium text-[var(--foreground)]">{selectedDeal.owner}</p>
-                  <p className="text-sm text-[var(--muted-foreground)]">Sales Representative</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button variant="primary" className="flex-1" onClick={() => setSelectedDeal(null)}>
-                Cerrar
-              </Button>
-            </div>
-
-          </Card>
-        </div>
+        <DealModal
+          isOpen={!!selectedDeal}
+          onClose={() => setSelectedDeal(null)}
+          onSave={handleDealUpdate}
+          onDelete={handleDealDelete}
+          editDeal={storageDeals.find(d => d.id === selectedDeal.id)}
+        />
       )}
 
       {/* Modal Nuevo Deal */}

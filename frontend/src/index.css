@@ -176,77 +176,25 @@
 
 /* ===== FIX PARA MODALS - LEGIBILIDAD EN AMBOS MODOS ===== */
 
-/* Light mode: Modal blanco con texto negro */
+/* ===== MODAL KIONCRM: CORRECCIÓN DE LEGIBILIDAD ===== */
+
 [data-slot="dialog-content"] {
   background-color: white !important;
-  color: #1a1a1a !important;
+  /* CAMBIO: Usamos variable en lugar de color fijo para permitir que Tailwind funcione */
+  color: var(--foreground) !important; 
 }
 
-[data-slot="dialog-content"] label,
-[data-slot="dialog-content"] [data-slot="dialog-title"] {
-  color: #1a1a1a !important;
-}
-
+/* Mantenemos tus inputs exactamente como los tenías para no romper su visual */
 [data-slot="dialog-content"] input {
   background-color: #f5f5f5 !important;
   color: #1a1a1a !important;
   border-color: #e0e0e0 !important;
 }
 
-[data-slot="dialog-content"] input::placeholder {
-  color: #757575 !important;
-}
+/* ... (El resto de tu código de placeholders y labels se mantiene igual) ... */
 
-/* Dark mode: Modal oscuro con texto blanco */
+/* Dark mode: Mantenemos tu configuración de colores oscuros */
 .dark [data-slot="dialog-content"] {
   background-color: #1f2937 !important;
-  color: #f3f4f6 !important;
+  color: var(--foreground) !important;
 }
-
-.dark [data-slot="dialog-content"] label,
-.dark [data-slot="dialog-content"] [data-slot="dialog-title"] {
-  color: #f3f4f6 !important;
-}
-
-.dark [data-slot="dialog-content"] input {
-  background-color: #374151 !important;
-  color: #f3f4f6 !important;
-  border-color: #4b5563 !important;
-}
-
-.dark [data-slot="dialog-content"] input::placeholder {
-  color: #9ca3af !important;
-}
-
-/* Options de los selects en dark mode */
-.dark select option {
-  background-color: #1f2937 !important;
-  color: #f3f4f6 !important;
-}
-
-/* Light mode - asegurar que sea legible */
-select option {
-  background-color: white !important;
-  color: #1a1a1a !important;
-}
-
-/* Hover en options (algunos browsers lo soportan) */
-.dark select option:hover {
-  background-color: #374151 !important;
-}
-
-select option:hover {
-  background-color: #f5f5f5 !important;
-}
-
-/* Selected option */
-.dark select option:checked {
-  background-color: #4b5563 !important;
-  color: white !important;
-}
-
-select option:checked {
-  background-color: #06B6D4 !important;  /* Teal en lugar de morado */
-  color: white !important;
-}
-

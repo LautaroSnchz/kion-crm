@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Lock } from 'lucide-react';
 import type { Deal } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import { useClients } from '@/hooks/useClients';
@@ -243,18 +243,37 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
           {/* Actions */}
           <div className="flex gap-3 pt-4">
             {/* Botón Eliminar */}
-            {onDelete && (
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="px-4 py-2 border border-red-300 dark:border-red-800 
-                         text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 
-                         dark:hover:bg-red-900/20 transition-colors font-medium flex items-center gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                Eliminar
-              </button>
-            )}
+{onDelete && (
+  <div className="relative group">
+    <button
+      type="button"
+      onClick={() => {
+        if (isDemo) {
+          toast.info('Demo Mode', {
+            description: 'No puedes eliminar deals en modo demo',
+            icon: '🔒'
+          });
+          return;
+        }
+        setShowDeleteConfirm(true);
+      }}
+      className={`px-4 py-2 border border-red-300 dark:border-red-800 
+               text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 
+               dark:hover:bg-red-900/20 transition-colors font-medium flex items-center gap-2
+               ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
+      title={isDemo ? "🔒 Deshabilitado en modo demo" : ""}
+    >
+      {isDemo && <Lock className="w-4 h-4" />}
+      <Trash2 className="w-4 h-4" />
+      Eliminar
+    </button>
+    {isDemo && (
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+        🔒 Deshabilitado en modo demo
+      </div>
+    )}
+  </div>
+)}
 
             <div className="flex-1 flex gap-3">
               <button

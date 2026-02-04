@@ -430,22 +430,21 @@ const { deals } = useDeals();
               {/* Acciones con demo mode */}
               <div className="space-y-2 pt-4">
                 <div className="relative group">
-                  <Button 
-                    variant="primary" 
-                    className={`w-full ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-                    onClick={() => {
-                      if (isDemo) {
-                        toast.info("Demo Mode", {
-                          description: "No puedes editar clientes en modo demo"
-                        });
-                        return;
-                      }
-                      setIsEditModalOpen(true);
-                    }}
-                  >
-                    {isDemo && <Lock className="w-4 h-4 mr-2" />}
-                    Editar Cliente
-                  </Button>
+<button
+  className={`w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-colors font-medium shadow-lg shadow-cyan-500/30 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
+  onClick={() => {
+    if (isDemo) {
+      toast.info("Demo Mode", {
+        description: "No puedes editar clientes en modo demo"
+      });
+      return;
+    }
+    setIsEditModalOpen(true);
+  }}
+>
+  {isDemo && <Lock className="w-4 h-4" />}
+  Editar Cliente
+</button>
                   {isDemo && (
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                       🔒 Deshabilitado en modo demo

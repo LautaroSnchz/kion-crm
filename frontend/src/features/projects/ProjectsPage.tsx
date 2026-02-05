@@ -3,7 +3,6 @@ import {
   LayoutGrid, 
   List, 
   Filter, 
-  Plus,
   DollarSign,
   Calendar,
   TrendingUp,

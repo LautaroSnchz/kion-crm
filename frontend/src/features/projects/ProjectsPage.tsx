@@ -8,7 +8,8 @@ import {
   Calendar,
   TrendingUp,
   GripVertical,
-  Lock
+  Lock,
+  Handshake
 } from "lucide-react";
 import {
   DndContext,
@@ -423,15 +424,22 @@ const handleDragEnd = () => {
             Filtros
           </Button>
           
-          <Button 
-            variant="primary" 
-            className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-            onClick={() => !isDemo && setIsModalOpen(true)}
-          >
-            {isDemo && <Lock className="w-4 h-4" />}
-            <Plus className="w-4 h-4" />
-            Nuevo Deal
-          </Button>
+<Button 
+  variant="primary" 
+  className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
+  onClick={() => {
+    if (isDemo) {
+      toast.info("Demo Mode", {
+        description: "La creación de deals está deshabilitada en modo demo"
+      });
+      return;
+    }
+    setIsModalOpen(true);
+  }}
+>
+  {isDemo ? <Lock className="w-4 h-4" /> : <Handshake className="w-4 h-4" />}
+  Nuevo Deal
+</Button>
         </div>
       </div>
 

@@ -41,8 +41,8 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Acme Corporation',
     status: 'active',
     value: 45000,
-    createdAt: '2024-01-15',
-    lastContact: '2024-01-16',
+    createdAt: '2026-01-15',
+    lastContact: '2026-01-16',
   },
   {
     id: '2',
@@ -52,8 +52,8 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Initech Solutions',
     status: 'active',
     value: 12000,
-    createdAt: '2024-01-10',
-    lastContact: '2024-01-17',
+    createdAt: '2026-01-10',
+    lastContact: '2026-01-17',
   },
   {
     id: '3',
@@ -63,8 +63,8 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Globex Industries',
     status: 'active',
     value: 89000,
-    createdAt: '2024-01-18',
-    lastContact: '2024-01-18',
+    createdAt: '2026-01-18',
+    lastContact: '2026-01-18',
   },
   {
     id: '4',
@@ -74,8 +74,8 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Wayne Corp',
     status: 'active',
     value: 34000,
-    createdAt: '2024-01-05',
-    lastContact: '2024-01-16',
+    createdAt: '2026-01-05',
+    lastContact: '2026-01-16',
   },
   {
     id: '5',
@@ -85,8 +85,8 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Umbrella Corporation',
     status: 'active',
     value: 67000,
-    createdAt: '2024-01-08',
-    lastContact: '2024-01-15',
+    createdAt: '2026-01-08',
+    lastContact: '2026-01-15',
   },
   {
     id: '6',
@@ -96,7 +96,7 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Stark Industries Inc',
     status: 'active',
     value: 125000,
-    createdAt: '2024-01-19',
+    createdAt: '2026-01-19',
     lastContact: 'Hoy',
   },
   {
@@ -107,7 +107,7 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Cyberdyne Corp',
     status: 'prospect',
     value: 0,
-    createdAt: '2024-01-20',
+    createdAt: '2026-01-20',
     lastContact: 'Hace 3 días',
   },
   {
@@ -118,7 +118,7 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Tyrell Inc',
     status: 'prospect',
     value: 0,
-    createdAt: '2024-01-22',
+    createdAt: '2026-01-22',
     lastContact: 'Hace 1 semana',
   },
   {
@@ -129,7 +129,7 @@ const INITIAL_CLIENTS: Client[] = [
     company: 'Weyland-Yutani Corp',
     status: 'inactive',
     value: 0,
-    createdAt: '2023-11-15',
+    createdAt: '2025-11-15',
     lastContact: 'Hace 2 meses',
   }
 ];
@@ -143,8 +143,8 @@ const INITIAL_DEALS: Deal[] = [
     value: 45000,
     stage: 'lead',
     probability: 75,
-    expectedCloseDate: '2025-02-14',
-    createdAt: '2024-01-10',
+    expectedCloseDate: '2026-04-22',
+    createdAt: '2026-01-10',
     owner: 'Mike Johnson'
   },
   {
@@ -154,8 +154,8 @@ const INITIAL_DEALS: Deal[] = [
     value: 12000,
     stage: 'lead',
     probability: 20,
-    expectedCloseDate: '2025-03-09',
-    createdAt: '2024-01-12',
+    expectedCloseDate: '2026-04-10',
+    createdAt: '2026-01-12',
     owner: 'Orion Castillo'
   },
   {
@@ -165,8 +165,8 @@ const INITIAL_DEALS: Deal[] = [
     value: 89000,
     stage: 'qualified',
     probability: 60,
-    expectedCloseDate: '2025-01-29',
-    createdAt: '2024-01-18',
+    expectedCloseDate: '2026-05-15',
+    createdAt: '2026-01-18',
     owner: 'John Davis'
   },
   {
@@ -176,8 +176,8 @@ const INITIAL_DEALS: Deal[] = [
     value: 34000,
     stage: 'qualified',
     probability: 50,
-    expectedCloseDate: '2025-02-04',
-    createdAt: '2024-01-05',
+    expectedCloseDate: '2026-05-30',
+    createdAt: '2026-01-05',
     owner: 'Orion Castillo'
   },
   {
@@ -187,8 +187,8 @@ const INITIAL_DEALS: Deal[] = [
     value: 67000,
     stage: 'proposal',
     probability: 40,
-    expectedCloseDate: '2025-02-27',
-    createdAt: '2024-01-08',
+    expectedCloseDate: '2026-06-12',
+    createdAt: '2026-01-08',
     owner: 'Mike Johnson'
   },
   {
@@ -198,8 +198,8 @@ const INITIAL_DEALS: Deal[] = [
     value: 125000,
     stage: 'closed',
     probability: 100,
-    expectedCloseDate: '2025-01-19',
-    createdAt: '2024-01-19',
+    expectedCloseDate: '2026-01-19',
+    createdAt: '2026-01-19',
     owner: 'John Davis'
   }
 ];

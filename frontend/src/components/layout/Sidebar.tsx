@@ -49,7 +49,7 @@ export function Sidebar() {
       
       <nav className="space-y-1 flex-1">
         <NavLink 
-          to="/" 
+          to="/dashboard" 
           end 
           className={({isActive}) => `
             flex items-center gap-2 px-3 py-2 rounded-lg 

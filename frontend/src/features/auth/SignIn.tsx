@@ -51,7 +51,7 @@ export default function SignIn() {
     loginAsDemo();
 
     setTimeout(() => {
-      navigate("/");
+      navigate("/dashboard");
     }, 300);
   };
 
@@ -64,7 +64,7 @@ export default function SignIn() {
 
     if (success) {
       setTimeout(() => {
-        navigate("/");
+        navigate("/dashboard");
       }, 300);
     } else {
       setError("Credenciales inválidas");

@@ -19,7 +19,7 @@ export function Topbar() {
         <SheetContent side="left" className="w-64">
           <div className="font-bold mb-4">KionCRM</div>
           <nav className="grid gap-2">
-            <NavLink to="/" className="px-2 py-2 rounded hover:bg-muted">
+            <NavLink to="/dashboard" className="px-2 py-2 rounded hover:bg-muted">
               Dashboard
             </NavLink>
             <NavLink to="/clients" className="px-2 py-2 rounded hover:bg-muted">

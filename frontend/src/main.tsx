@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AppProviders } from "@/lib/providers";
 import AppLayout from "@/components/layout/AppLayout";
 import DashboardPage from "@/features/dashboard/DashboardPage";
@@ -12,19 +12,45 @@ import "./index.css";
 
 const router = createBrowserRouter([
   {
+    path: "/",
+    element: <Navigate to="/signin" replace />,
+  },
+  {
     path: "/signin",
     element: <SignIn />,
   },
   {
-    path: "/",
-    element: <AppLayout />,
+    path: "/dashboard",
+    element: <Protected />,
     children: [
       {
-        element: <Protected />,
+        element: <AppLayout />,
         children: [
           { index: true, element: <DashboardPage /> },
-          { path: "clients", element: <ClientsPage /> },
-          { path: "projects", element: <ProjectsPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: "/clients",
+    element: <Protected />,
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <ClientsPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: "/projects",
+    element: <Protected />,
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <ProjectsPage /> },
         ],
       },
     ],

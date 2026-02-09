@@ -166,8 +166,7 @@ const { deals } = useDeals();
         {/* Botón con estado demo */}
         <Button 
           variant="primary" 
-          className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-          onClick={handleNewClientClick}
+className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed brightness-75' : ''}`}          onClick={handleNewClientClick}
         >
           {isDemo ? <Lock className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
           Nuevo Cliente
@@ -431,8 +430,7 @@ const { deals } = useDeals();
               <div className="space-y-2 pt-4">
                 <div className="relative group">
 <button
-  className={`w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-colors font-medium shadow-lg shadow-cyan-500/30 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-  onClick={() => {
+className={`w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-colors font-medium shadow-lg shadow-cyan-500/30 ${isDemo ? 'opacity-60 cursor-not-allowed brightness-75' : ''}`}  onClick={() => {
     if (isDemo) {
       toast.info("Demo Mode", {
         description: "No puedes editar clientes en modo demo"

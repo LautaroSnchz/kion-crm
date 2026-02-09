@@ -425,8 +425,7 @@ const handleDragEnd = () => {
           
 <Button 
   variant="primary" 
-  className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
-  onClick={() => {
+className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed brightness-75' : ''}`}  onClick={() => {
     if (isDemo) {
       toast.info("Demo Mode", {
         description: "La creación de deals está deshabilitada en modo demo"

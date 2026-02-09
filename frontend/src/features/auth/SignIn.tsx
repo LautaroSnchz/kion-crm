@@ -78,7 +78,7 @@ export default function SignIn() {
       {/* Toggle theme */}
       <button
         onClick={toggleTheme}
-        className="fixed top-4 right-4 p-2 rounded-lg bg-[var(--muted)] hover:bg-[var(--muted)]/80 transition-colors"
+        className="fixed top-4 right-4 p-2 rounded-lg bg-[var(--muted)] hover:bg-[var(--muted)]/80 transition-colors cursor-pointer"
       >
         {isDark ? (
           <Sun className="w-5 h-5 text-[var(--foreground)]" />
@@ -109,7 +109,7 @@ export default function SignIn() {
           <button
             onClick={handleDemoAccess}
             disabled={loading}
-            className="w-full btn-kion h-12 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full btn-kion h-12 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <>
@@ -152,7 +152,7 @@ export default function SignIn() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 required
-                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)]"
+                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all"
               />
             </div>
 
@@ -166,16 +166,29 @@ export default function SignIn() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
-                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)]"
+                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-2 bg-[var(--muted)] hover:bg-[var(--muted)]/80 rounded-md"
+              className="w-full px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-medium rounded-md 
+                         hover:from-teal-600 hover:to-cyan-700 
+                         active:scale-[0.98] 
+                         transition-all duration-200 
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         cursor-pointer
+                         shadow-md hover:shadow-lg"
             >
-              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Iniciando sesión...
+                </span>
+              ) : (
+                "Iniciar sesión"
+              )}
             </button>
           </form>
 

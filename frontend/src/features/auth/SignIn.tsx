@@ -89,7 +89,7 @@ export default function SignIn() {
 
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 mt-5">
           <img 
             src="/logo.png" 
             alt="KionCRM Logo" 

@@ -166,7 +166,7 @@ const { deals } = useDeals();
         {/* Botón con estado demo */}
         <Button 
           variant="primary" 
-className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed brightness-75' : ''}`}          onClick={handleNewClientClick}
+className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed brightness-75' : 'cursor-pointer'}`}          onClick={handleNewClientClick}
         >
           {isDemo ? <Lock className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
           Nuevo Cliente

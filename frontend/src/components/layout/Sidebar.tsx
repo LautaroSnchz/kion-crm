@@ -93,7 +93,7 @@ export function Sidebar() {
         {/* Botón de logout */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--muted-foreground)] hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--muted-foreground)] hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
         >
           <LogOut className="size-4" />
           Cerrar sesión

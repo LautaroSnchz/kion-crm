@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useClients } from "@/hooks/useClients";
+import { useTheme } from "@/hooks/useTheme";
+
 
 interface NewDealModalProps {
   open: boolean;
@@ -20,6 +22,8 @@ const ASSIGNEES = [
 const STAGES = ["Lead", "Qualified", "Proposal", "Closed Won"];
 
 export default function NewDealModal({ open, onClose, onDealCreated }: NewDealModalProps) {
+  const { isDark } = useTheme();
+console.log('NewDealModal isDark:', isDark);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     client: "",
@@ -130,6 +134,7 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
               value={formData.client}
               onChange={(e) => handleChange("client", e.target.value)}
               disabled={loading}
+              style={{ colorScheme: isDark ? 'dark' : 'light' }}
               className={`w-full px-3 py-2 border rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] ${
                 errors.client ? "border-red-500" : "border-[var(--border)]"
               }`}
@@ -192,6 +197,7 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
                 value={formData.priority}
                 onChange={(e) => handleChange("priority", e.target.value)}
                 disabled={loading}
+                style={{ colorScheme: isDark ? 'dark' : 'light' }}
                 className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
               >
                 {PRIORITIES.map(priority => (
@@ -209,6 +215,7 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
                 value={formData.stage}
                 onChange={(e) => handleChange("stage", e.target.value)}
                 disabled={loading}
+                style={{ colorScheme: isDark ? 'dark' : 'light' }}
                 className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
               >
                 {STAGES.map(stage => (
@@ -229,6 +236,7 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
                 value={formData.assignee}
                 onChange={(e) => handleChange("assignee", e.target.value)}
                 disabled={loading}
+                style={{ colorScheme: isDark ? 'dark' : 'light' }}
                 className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
               >
                 {ASSIGNEES.map(assignee => (

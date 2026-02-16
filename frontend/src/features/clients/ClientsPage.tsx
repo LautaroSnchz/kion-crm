@@ -408,7 +408,9 @@ className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed br
               <div className="grid grid-cols-2 gap-4">
                 <Card className="p-4">
                   <p className="text-sm text-[var(--muted-foreground)] mb-1">Deals activos</p>
-                  <p className="text-2xl font-bold text-[var(--foreground)]">{selectedClient.deals}</p>
+                  <p className="text-2xl font-bold text-[var(--foreground)]">
+                    {deals.filter(d => d.client === selectedClient.name && d.stage !== 'closed').length}
+                  </p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-sm text-[var(--muted-foreground)] mb-1">Valor total</p>
@@ -449,7 +451,16 @@ className={`w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-
                     </div>
                   )}
                 </div>
-                <Button variant="default" className="w-full">
+                <Button 
+                  variant="default" 
+                  className="w-full"
+                  onClick={() => {
+                    // Cerrar el sidebar
+                    setSelectedClient(null);
+                    // Navegar a proyectos (opcionalmente filtrar por cliente)
+                    window.location.href = '/projects';
+                  }}
+                >
                   Ver Deals
                 </Button>
               </div>

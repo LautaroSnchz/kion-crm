@@ -1,200 +1,240 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+  @import "tailwindcss";
+  @import "tw-animate-css";
 
-/* ---------- TOKENS DE IDENTIDAD KIONCRM (LIGHT MODE) ---------- */
-:root {
-  /* base */
-  --background: #FAFAFA;
-  --foreground: #0F0F0F;
+  /* ---------- TOKENS DE IDENTIDAD KIONCRM (LIGHT MODE) ---------- */
+  :root {
+    /* base */
+    --background: #FAFAFA;
+    --foreground: #0F0F0F;
 
-  /* surfaces */
-  --card: #FFFFFF;
-  --card-foreground: #0F0F0F;
+    /* surfaces */
+    --card: #FFFFFF;
+    --card-foreground: #0F0F0F;
 
-  /* borders & separators */
-  --border: #E2E2E2;
-  --muted: #F5F5F5;
-  --muted-foreground: #525252;
+    /* borders & separators */
+    --border: #E2E2E2;
+    --muted: #F5F5F5;
+    --muted-foreground: #525252;
 
-/* brand / accent - CAMBIO A TEAL */
---primary: #06B6D4;  /* Cyan/Teal profesional */
---primary-foreground: #FFFFFF;
---ring: rgba(6,182,212,0.4);
+  /* brand / accent - CAMBIO A TEAL */
+  --primary: #06B6D4;  /* Cyan/Teal profesional */
+  --primary-foreground: #FFFFFF;
+  --ring: rgba(6,182,212,0.4);
 
-  /* AGREGAR ESTAS QUE FALTAN: */
-  --secondary: #F5F5F5;
-  --secondary-foreground: #0F0F0F;
-  
-  --accent: #F5F5F5;
-  --accent-foreground: #0F0F0F;
+    /* AGREGAR ESTAS QUE FALTAN: */
+    --secondary: #F5F5F5;
+    --secondary-foreground: #0F0F0F;
+    
+    --accent: #F5F5F5;
+    --accent-foreground: #0F0F0F;
 
-  /* estados */
-  --destructive: #DC2626;
-  --destructive-foreground: #FFFFFF;
+    /* estados */
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
 
-  /* others */
-  --popover: #FFFFFF;
-  --popover-foreground: #0F0F0F;
-  --input: #E5E7EB;
-  
-  /* IMPORTANTE: radius para borderRadius */
-  --radius: 0.5rem;
-}
-
-/* ---------- DARK MODE ---------- */
-.dark {
-  --background:        #12121A;
-  --foreground:        #F5F5F5;
-
-  --card:              #1A1A22;
-  --card-foreground:   #F5F5F5;
-
-  --border:            rgba(255,255,255,0.10);
-  --muted:             #14141C;
-  --muted-foreground:  #9A9A9A;
-
-  --primary:           #22D3EE;   /* Cyan brillante para dark mode */
-  --primary-foreground:#0F0F0F;   /* Texto oscuro para mejor contraste */
-
-  --ring:              rgba(34,211,238,0.45);
-
-  --popover:           #1A1A22;
-  --popover-foreground:#F5F5F5;
-
-  --input:             rgba(255,255,255,0.16);
-}
-
-
-.theme-smooth * {
-  transition:
-    background-color .28s ease,
-    color .28s ease,
-    border-color .28s ease,
-    fill .28s ease,
-    stroke .28s ease,
-    box-shadow .28s ease;
-}
-
-/* ---------- BASE + SHADCN CONEXIÓN ---------- */
-@layer base {
-  * {
-   @apply border-[var(--border)];
-    outline-color: color-mix(in oklab, var(--ring) 30%, transparent);
- }
-
-  body {
-    @apply bg-[var(--background)] text-[var(--foreground)];
+    /* others */
+    --popover: #FFFFFF;
+    --popover-foreground: #0F0F0F;
+    --input: #E5E7EB;
+    
+    /* IMPORTANTE: radius para borderRadius */
+    --radius: 0.5rem;
   }
 
-  .card-surface {
-    @apply bg-[var(--card)] text-[var(--card-foreground)]
-           border border-[var(--border)] rounded-xl shadow-sm;
-  }
-}
+  /* ---------- DARK MODE ---------- */
+  .dark {
+    --background:        #12121A;
+    --foreground:        #F5F5F5;
 
-/* ---------- UTILITIES CUSTOM ---------- */
-@layer utilities {
-  .divider-soft {
-    background-color: rgba(6,182,212,0.25);
-    height: 1px;
-  }
+    --card:              #1A1A22;
+    --card-foreground:   #F5F5F5;
 
-  .btn-primary {
-    /* vacío, no lo tocamos */
-  }
+    --border:            rgba(255,255,255,0.10);
+    --muted:             #14141C;
+    --muted-foreground:  #9A9A9A;
 
-  .isla:hover {
-    box-shadow: 0 0 0 6px rgba(6,182,212,0.12);
-  }
+    --primary:           #22D3EE;   /* Cyan brillante para dark mode */
+    --primary-foreground:#0F0F0F;   /* Texto oscuro para mejor contraste */
 
-  .dark .isla:hover {
-    box-shadow: 0 0 0 8px rgba(34,211,238,0.18);
+    --ring:              rgba(34,211,238,0.45);
+
+    --popover:           #1A1A22;
+    --popover-foreground:#F5F5F5;
+
+    --input:             rgba(255,255,255,0.16);
   }
 
-  /* ---------------------------- */
-  /* NUEVAS UTILIDADES KIONCRM   */
-  /* ---------------------------- */
 
-/* Botón primario moderno - MEJORADO */
-.btn-kion{
-  background: var(--primary);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.25);
-  font-weight: 600;
-  padding: 0.5rem 1.25rem; /* ← AGREGAR ESTA LÍNEA (py-2 px-5) */
-  transition: all .20s ease;
-  --tw-ring-color: var(--ring);
-}
+  .theme-smooth * {
+    transition:
+      background-color .28s ease,
+      color .28s ease,
+      border-color .28s ease,
+      fill .28s ease,
+      stroke .28s ease,
+      box-shadow .28s ease;
+  }
 
-.btn-kion:hover{
-  background: #0891B2; /* Teal más oscuro al hover */
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
-  transform: translateY(-1px); /* Efecto lift sutil */
-}
+  /* ---------- BASE + SHADCN CONEXIÓN ---------- */
+  @layer base {
+    * {
+    @apply border-[var(--border)];
+      outline-color: color-mix(in oklab, var(--ring) 30%, transparent);
+  }
 
-.btn-kion:active{ 
-  transform: translateY(0); 
-  box-shadow: 0 1px 4px rgba(6, 182, 212, 0.2);
-}
+    body {
+      @apply bg-[var(--background)] text-[var(--foreground)];
+    }
 
-/* Divider teal */
-.kion-divider{
-  height:1px;
-  background: rgba(6,182,212,.20);
-}
+    .card-surface {
+      @apply bg-[var(--card)] text-[var(--card-foreground)]
+            border border-[var(--border)] rounded-xl shadow-sm;
+    }
+  }
 
-/* Hover teal en filas */
-.kion-row-hover:hover{
-  background: color-mix(in oklab, var(--primary) 8%, transparent);
-}
-}
-/* Dark mode para botón Kion – más sobrio */
-.dark .btn-kion {
-  background: #22D3EE;
-  color: #0F0F0F; /* Texto oscuro para buen contraste */
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 2px 8px rgba(34, 211, 238, 0.3);
-}
+  /* ---------- UTILITIES CUSTOM ---------- */
+  @layer utilities {
+    .divider-soft {
+      background-color: rgba(6,182,212,0.25);
+      height: 1px;
+    }
 
-.dark .btn-kion:hover {
-  background: #06B6D4; /* Más oscuro al hover */
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.4);
-  transform: translateY(-1px);
-}
+    .btn-primary {
+      /* vacío, no lo tocamos */
+    }
 
-.dark .btn-kion:active { 
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(34, 211, 238, 0.25);
-}
+    .isla:hover {
+      box-shadow: 0 0 0 6px rgba(6,182,212,0.12);
+    }
+
+    .dark .isla:hover {
+      box-shadow: 0 0 0 8px rgba(34,211,238,0.18);
+    }
+
+    /* ---------------------------- */
+    /* NUEVAS UTILIDADES KIONCRM   */
+    /* ---------------------------- */
+
+  /* Botón primario moderno - MEJORADO */
+  .btn-kion{
+    background: var(--primary);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.25);
+    font-weight: 600;
+    padding: 0.5rem 1.25rem; /* ← AGREGAR ESTA LÍNEA (py-2 px-5) */
+    transition: all .20s ease;
+    --tw-ring-color: var(--ring);
+  }
+
+  .btn-kion:hover{
+    background: #0891B2; /* Teal más oscuro al hover */
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
+    transform: translateY(-1px); /* Efecto lift sutil */
+  }
+
+  .btn-kion:active{ 
+    transform: translateY(0); 
+    box-shadow: 0 1px 4px rgba(6, 182, 212, 0.2);
+  }
+
+  /* Divider teal */
+  .kion-divider{
+    height:1px;
+    background: rgba(6,182,212,.20);
+  }
+
+  /* Hover teal en filas */
+  .kion-row-hover:hover{
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+  }
+  }
+  /* Dark mode para botón Kion – más sobrio */
+  .dark .btn-kion {
+    background: #22D3EE;
+    color: #0F0F0F; /* Texto oscuro para buen contraste */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(34, 211, 238, 0.3);
+  }
+
+  .dark .btn-kion:hover {
+    background: #06B6D4; /* Más oscuro al hover */
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .dark .btn-kion:active { 
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(34, 211, 238, 0.25);
+  }
 
 
-/* Agregar al FINAL de tu index.css */
+  /* Agregar al FINAL de tu index.css */
 
-/* ===== FIX PARA MODALS - LEGIBILIDAD EN AMBOS MODOS ===== */
+  /* ===== FIX PARA MODALS - LEGIBILIDAD EN AMBOS MODOS ===== */
 
-/* ===== MODAL KIONCRM: CORRECCIÓN DE LEGIBILIDAD ===== */
+  /* ===== MODAL KIONCRM: CORRECCIÓN DE LEGIBILIDAD ===== */
 
-[data-slot="dialog-content"] {
-  background-color: white !important;
-  /* CAMBIO: Usamos variable en lugar de color fijo para permitir que Tailwind funcione */
-  color: var(--foreground) !important; 
-}
+  [data-slot="dialog-content"] {
+    background-color: white !important;
+    /* CAMBIO: Usamos variable en lugar de color fijo para permitir que Tailwind funcione */
+    color: var(--foreground) !important; 
+  }
 
-/* Mantenemos tus inputs exactamente como los tenías para no romper su visual */
-[data-slot="dialog-content"] input {
-  background-color: #f5f5f5 !important;
-  color: #1a1a1a !important;
-  border-color: #e0e0e0 !important;
-}
+  /* Mantenemos tus inputs exactamente como los tenías para no romper su visual */
+  [data-slot="dialog-content"] input {
+    background-color: #f5f5f5 !important;
+    color: #1a1a1a !important;
+    border-color: #e0e0e0 !important;
+  }
 
-/* ... (El resto de tu código de placeholders y labels se mantiene igual) ... */
+  /* ... (El resto de tu código de placeholders y labels se mantiene igual) ... */
 
-/* Dark mode: Mantenemos tu configuración de colores oscuros */
-.dark [data-slot="dialog-content"] {
-  background-color: #1f2937 !important;
-  color: var(--foreground) !important;
-}
+  /* Dark mode: Mantenemos tu configuración de colores oscuros */
+  .dark [data-slot="dialog-content"] {
+    background-color: #1f2937 !important;
+    color: var(--foreground) !important;
+  }
+
+
+  /* Fix para selects en modals - Dark mode */
+  [data-slot="dialog-content"] select {
+    background-color: var(--input) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+  }
+
+  [data-slot="dialog-content"] select option {
+    background-color: var(--card) !important;
+    color: var(--foreground) !important;
+  }
+
+  .dark [data-slot="dialog-content"] select {
+    color-scheme: dark;
+  }
+
+  :not(.dark) [data-slot="dialog-content"] select {
+    color-scheme: light;
+  }
+
+  /* Fix para DealModal (modal custom sin data-slot) */
+  .dark select {
+    color-scheme: dark;
+  }
+
+  .dark select option {
+    background-color: #1f2937 !important;
+    color: #f5f5f5 !important;
+  }
+
+  :not(.dark) select {
+    color-scheme: light;
+  }
+
+  :not(.dark) select option {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+  }

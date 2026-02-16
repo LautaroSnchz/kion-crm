@@ -3,6 +3,7 @@ import { X, Trash2, Lock } from 'lucide-react';
 import type { Deal } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import { useClients } from '@/hooks/useClients';
+import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 
 interface DealModalProps {
@@ -15,6 +16,7 @@ interface DealModalProps {
 
 export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealModalProps) {
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const isDemo = user?.role === 'demo';
   
   // Clientes dinámicos desde localStorage
@@ -144,6 +146,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               required
               value={formData.client}
               onChange={(e) => setFormData({ ...formData, client: e.target.value })}
+              style={{ colorScheme: isDark ? 'dark' : 'light' }}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
                        focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
@@ -182,6 +185,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
             <select
               value={formData.stage}
               onChange={(e) => setFormData({ ...formData, stage: e.target.value as Deal['stage'] })}
+              style={{ colorScheme: isDark ? 'dark' : 'light' }}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
                        focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"

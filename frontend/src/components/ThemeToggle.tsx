@@ -1,9 +1,9 @@
 import { Switch } from "@/components/ui/switch";
 import { Sun, Moon } from "lucide-react";
-import { useTheme } from "@/lib/theme";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function ThemeToggle() {
-  const { theme, toggle } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const checked = theme === "dark";
 
   return (
@@ -22,7 +22,7 @@ export default function ThemeToggle() {
         onCheckedChange={() => {
           // transición suave
           document.documentElement.classList.add("theme-smooth");
-          toggle();
+          toggleTheme();
           setTimeout(() => {
             document.documentElement.classList.remove("theme-smooth");
           }, 320);

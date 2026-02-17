@@ -132,7 +132,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-text"
               placeholder="Migración Cloud Platform"
             />
           </div>
@@ -149,7 +149,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               style={{ colorScheme: isDark ? 'dark' : 'light' }}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-pointer"
             >
               <option value="">Seleccionar cliente</option>
               {clientNames.map(client => (
@@ -172,7 +172,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-text"
               placeholder="50000"
             />
           </div>
@@ -188,7 +188,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               style={{ colorScheme: isDark ? 'dark' : 'light' }}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-pointer"
             >
               <option value="lead">Lead</option>
               <option value="qualified">Qualified</option>
@@ -209,7 +209,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               step="5"
               value={formData.probability}
               onChange={(e) => setFormData({ ...formData, probability: parseInt(e.target.value) })}
-              className="w-full accent-cyan-500"
+              className="w-full accent-cyan-500 cursor-pointer"
             />
           </div>
 
@@ -224,7 +224,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               onChange={(e) => setFormData({ ...formData, expectedCloseDate: e.target.value })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-text"
             />
           </div>
 
@@ -239,7 +239,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-none"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent resize-none cursor-text"
               placeholder="Información adicional sobre este deal..."
             />
           </div>
@@ -264,7 +264,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
       className={`px-4 py-2 border border-red-300 dark:border-red-800 
                text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 
                dark:hover:bg-red-900/20 transition-colors font-medium flex items-center gap-2
-               ${isDemo ? 'opacity-60 cursor-not-allowed' : ''}`}
+               ${isDemo ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
       title={isDemo ? "🔒 Deshabilitado en modo demo" : ""}
     >
       {isDemo && <Lock className="w-4 h-4" />}
@@ -285,7 +285,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
                 onClick={onClose}
                 className="flex-1 px-4 py-2 border border-[var(--border)] 
                          text-[var(--foreground)] rounded-lg hover:bg-[var(--muted)] 
-                         transition-colors font-medium"
+                         transition-colors font-medium cursor-pointer"
               >
                 Cancelar
               </button>
@@ -293,7 +293,7 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
                 type="submit"
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 
                          hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg 
-                         transition-colors font-medium shadow-lg shadow-cyan-500/30"
+                         transition-colors font-medium shadow-lg shadow-cyan-500/30 cursor-pointer"
               >
                 Guardar
               </button>
@@ -316,14 +316,14 @@ export function DealModal({ isOpen, onClose, onSave, onDelete, editDeal }: DealM
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 px-4 py-2 border border-[var(--border)] rounded-lg 
-                         hover:bg-[var(--muted)] transition-colors font-medium"
+                         hover:bg-[var(--muted)] transition-colors font-medium cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDelete}
                 className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white 
-                         rounded-lg transition-colors font-medium"
+                         rounded-lg transition-colors font-medium cursor-pointer"
               >
                 Eliminar
               </button>

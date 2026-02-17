@@ -121,7 +121,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-text"
               placeholder="Acme Corporation"
             />
           </div>
@@ -138,7 +138,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-text"
               placeholder="contact@acme.com"
             />
           </div>
@@ -154,7 +154,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-text"
               placeholder="+54 11 1234-5678"
             />
           </div>
@@ -170,7 +170,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-text"
               placeholder="Acme Corp"
             />
           </div>
@@ -185,7 +185,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
               onChange={(e) => setFormData({ ...formData, status: e.target.value as Client['status'] })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-pointer"
             >
               <option value="prospect">Prospect</option>
               <option value="active">Activo</option>
@@ -206,7 +206,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
               onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })}
               className="w-full px-3 py-2 border border-[var(--border)] rounded-lg 
                        bg-[var(--input)] text-[var(--foreground)]
-                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                       focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent cursor-text"
               placeholder="50000"
             />
           </div>
@@ -220,7 +220,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
                 onClick={() => setShowDeleteConfirm(true)}
                 className="px-4 py-2 border border-red-300 dark:border-red-800 
                          text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 
-                         dark:hover:bg-red-900/20 transition-colors font-medium flex items-center gap-2"
+                         dark:hover:bg-red-900/20 transition-colors font-medium flex items-center gap-2 cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />
                 Eliminar
@@ -233,7 +233,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
                 onClick={onClose}
                 className="flex-1 px-4 py-2 border border-[var(--border)] 
                          text-[var(--foreground)] rounded-lg hover:bg-[var(--muted)] 
-                         transition-colors font-medium"
+                         transition-colors font-medium cursor-pointer"
               >
                 Cancelar
               </button>
@@ -241,7 +241,7 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
                 type="submit"
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 
                          hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg 
-                         transition-colors font-medium shadow-lg shadow-cyan-500/30"
+                         transition-colors font-medium shadow-lg shadow-cyan-500/30 cursor-pointer"
               >
                 Guardar
               </button>
@@ -264,14 +264,14 @@ export function ClientModal({ isOpen, onClose, onSave, onDelete, editClient }: C
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 px-4 py-2 border border-[var(--border)] rounded-lg 
-                         hover:bg-[var(--muted)] transition-colors font-medium"
+                         hover:bg-[var(--muted)] transition-colors font-medium cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDelete}
                 className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white 
-                         rounded-lg transition-colors font-medium"
+                         rounded-lg transition-colors font-medium cursor-pointer"
               >
                 Eliminar
               </button>

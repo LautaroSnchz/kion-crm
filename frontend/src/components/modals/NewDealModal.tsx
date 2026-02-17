@@ -135,7 +135,7 @@ console.log('NewDealModal isDark:', isDark);
               onChange={(e) => handleChange("client", e.target.value)}
               disabled={loading}
               style={{ colorScheme: isDark ? 'dark' : 'light' }}
-              className={`w-full px-3 py-2 border rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] ${
+              className={`w-full px-3 py-2 border rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] cursor-pointer ${
                 errors.client ? "border-red-500" : "border-[var(--border)]"
               }`}
             >
@@ -159,7 +159,7 @@ console.log('NewDealModal isDark:', isDark);
               onChange={(e) => handleChange("title", e.target.value)}
               placeholder="Ej: Migración Cloud Platform"
               disabled={loading}
-              className={errors.title ? "border-red-500" : ""}
+              className={`${errors.title ? "border-red-500" : ""} cursor-text`}
             />
             {errors.title && (
               <p className="text-xs text-red-500 mt-1">{errors.title}</p>
@@ -177,7 +177,7 @@ console.log('NewDealModal isDark:', isDark);
               onChange={(e) => handleChange("value", e.target.value)}
               placeholder="45000"
               disabled={loading}
-              className={errors.value ? "border-red-500" : ""}
+              className={`${errors.value ? "border-red-500" : ""} cursor-text`}
               min="0"
               step="1000"
             />
@@ -198,7 +198,7 @@ console.log('NewDealModal isDark:', isDark);
                 onChange={(e) => handleChange("priority", e.target.value)}
                 disabled={loading}
                 style={{ colorScheme: isDark ? 'dark' : 'light' }}
-                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] cursor-pointer"
               >
                 {PRIORITIES.map(priority => (
                   <option key={priority} value={priority}>{priority}</option>
@@ -216,7 +216,7 @@ console.log('NewDealModal isDark:', isDark);
                 onChange={(e) => handleChange("stage", e.target.value)}
                 disabled={loading}
                 style={{ colorScheme: isDark ? 'dark' : 'light' }}
-                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] cursor-pointer"
               >
                 {STAGES.map(stage => (
                   <option key={stage} value={stage}>{stage}</option>
@@ -237,7 +237,7 @@ console.log('NewDealModal isDark:', isDark);
                 onChange={(e) => handleChange("assignee", e.target.value)}
                 disabled={loading}
                 style={{ colorScheme: isDark ? 'dark' : 'light' }}
-                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                className="w-full px-3 py-2 border border-[var(--border)] rounded-md bg-[var(--input)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] cursor-pointer"
               >
                 {ASSIGNEES.map(assignee => (
                   <option key={assignee.id} value={assignee.id}>
@@ -257,7 +257,7 @@ console.log('NewDealModal isDark:', isDark);
                 value={formData.deadline}
                 onChange={(e) => handleChange("deadline", e.target.value)}
                 disabled={loading}
-                className={errors.deadline ? "border-red-500" : ""}
+                className={`${errors.deadline ? "border-red-500" : ""} cursor-text`}
                 min={new Date().toISOString().split('T')[0]}
               />
               {errors.deadline && (
@@ -267,19 +267,19 @@ console.log('NewDealModal isDark:', isDark);
           </div>
 
           <DialogFooter className="gap-2 mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancelar
-            </Button>
+<button
+  type="button"
+  onClick={onClose}
+  disabled={loading}
+  className="inline-flex items-center justify-center h-9 px-4 py-2 text-sm border border-[var(--border)] bg-background text-[var(--foreground)] hover:bg-[var(--muted)] rounded-md transition-colors cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  Cancelar
+</button>
             <Button
               type="submit"
               variant="kion"
               disabled={loading}
-              className="min-w-[120px]"
+              className="min-w-[120px] cursor-pointer"
             >
               {loading ? (
                 <>

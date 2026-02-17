@@ -226,8 +226,16 @@
   }
 
   .dark select option {
-    background-color: #1f2937 !important;
+    background-color: #1A1A22 !important; /* Más oscuro, coherente con var(--card) */
     color: #f5f5f5 !important;
+    -webkit-text-fill-color: #f5f5f5 !important; /* Forzar color en WebKit */
+  }
+
+  /* Forzar color en todos los estados del option */
+  .dark option {
+    background-color: #1A1A22 !important;
+    color: #f5f5f5 !important;
+    -webkit-text-fill-color: #f5f5f5 !important;
   }
 
   :not(.dark) select {
@@ -237,4 +245,14 @@
   :not(.dark) select option {
     background-color: #ffffff !important;
     color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
   }
+
+  /* NUEVO: Forzar fondo oscuro cuando el select está abierto/enfocado */
+  .dark select:focus option,
+  .dark select:active option {
+    background-color: #1A1A22 !important;
+    color: #f5f5f5 !important;
+  }
+
+  

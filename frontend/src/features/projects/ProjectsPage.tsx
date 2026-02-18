@@ -350,6 +350,15 @@ const handleDragEnd = () => {
       return;
     }
 
+    const ASSIGNEE_MAP: Record<string, string> = {
+      "SB": "Simon Belmont",
+      "SM": "Sofía Márquez",
+      "OC": "Orion Castillo",
+      "VR": "Valentina Ríos",
+      "EM": "Emilio Mendoza",
+      "LT": "Lucía Torres"
+    };
+
     const newDeal = {
       title: newDealFromModal.title,
       client: newDealFromModal.client,
@@ -358,8 +367,7 @@ const handleDragEnd = () => {
       stage: STAGE_MAP[newDealFromModal.stage] || "lead",
       probability: newDealFromModal.priority === "Alta" ? 75 : 
                    newDealFromModal.priority === "Media" ? 50 : 25,
-      owner: newDealFromModal.assignee === "MG" ? "María García" : 
-             newDealFromModal.assignee === "JP" ? "Juan Pérez" : "Ana Silva",
+      owner: ASSIGNEE_MAP[newDealFromModal.assignee] || newDealFromModal.assignee,
       notes: newDealFromModal.notes
     };
 

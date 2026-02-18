@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line } from "recharts";
 import { MetricCardSkeleton, ChartSkeleton } from "@/components/ui/Skeletons";
-import { getDashboardStats } from "@/lib/storage";
 import { useDeals } from "@/hooks/useDeals";
+import { useClients } from "@/hooks/useClients";
 
 // Componentes base
 const Card = ({ className = "", children }: any) => (
@@ -56,20 +56,18 @@ const RECENT_ACTIVITY = [
 ];
 
 const TOP_PERFORMERS = [
-  { id: 1, name: "Simon Belmont", deals: 12, revenue: "$340K", avatar: "MG", trend: "+23%" },
-  { id: 2, name: "Sofía Márquez", deals: 10, revenue: "$285K", avatar: "JP", trend: "+18%" },
-  { id: 3, name: "Orion Castillo", deals: 8, revenue: "$220K", avatar: "AS", trend: "+15%" },
+  { id: 1, name: "Simon Belmont", deals: 12, revenue: "$340K", avatar: "SB", trend: "+23%" },
+  { id: 2, name: "Sofía Márquez", deals: 10, revenue: "$285K", avatar: "SM", trend: "+18%" },
+  { id: 3, name: "Orion Castillo", deals: 8, revenue: "$220K", avatar: "OC", trend: "+15%" },
 ];
 
 export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState("6m");
   const [loading, setLoading] = useState(true);
   
-  // 📊 Hooks para datos DINÁMICOS
+  // 📊 Hooks para datos DINÁMICOS y REACTIVOS
   const { deals } = useDeals();
-  
-  // 📈 Calcular métricas REALES
-  const stats = getDashboardStats();
+  const { clients } = useClients();
 
   // Simular carga inicial
   useEffect(() => {
@@ -79,39 +77,43 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Pipeline dinámico por stage (4 STAGES)
+  // Helper: normaliza stage para comparar
+  // storage usa 'closed', Kanban/NewDeal usa 'Closed Won'
+  const isClosed = (stage: string) => stage === 'closed' || stage === 'Closed Won';
+  const isLead = (stage: string) => stage === 'lead' || stage === 'Lead';
+  const isQualified = (stage: string) => stage === 'qualified' || stage === 'Qualified';
+  const isProposal = (stage: string) => stage === 'proposal' || stage === 'Proposal';
+
+  // 📈 Métricas calculadas en tiempo real desde los hooks
+  const totalRevenue = deals
+    .filter(d => isClosed(d.stage))
+    .reduce((sum, d) => sum + (d.value || 0), 0);
+
+  const activeDeals = deals.filter(d => !isClosed(d.stage)).length;
+
+  const activeClients = clients.filter(c => c.status === 'active').length;
+
+  const closedWonDeals = deals.filter(d => isClosed(d.stage)).length;
+  const winRate = deals.length > 0 ? Math.round((closedWonDeals / deals.length) * 100) : 0;
+
+  // Pipeline dinámico — compatible con ambos formatos de stage
   const pipelineStages = [
-    { 
-      id: 'lead', 
-      name: 'Lead', 
-      color: 'bg-blue-500',
-      deals: deals.filter(d => d.stage === 'lead')
-    },
-    { 
-      id: 'qualified', 
-      name: 'Qualified', 
-      color: 'bg-purple-500',
-      deals: deals.filter(d => d.stage === 'qualified')
-    },
-    { 
-      id: 'proposal', 
-      name: 'Proposal', 
-      color: 'bg-orange-500',
-      deals: deals.filter(d => d.stage === 'proposal')
-    },
-    { 
-      id: 'closed', 
-      name: 'Closed Won', 
-      color: 'bg-green-500',
-      deals: deals.filter(d => d.stage === 'closed')
-    },
+    { id: 'lead', name: 'Lead', color: 'bg-blue-500', deals: deals.filter(d => isLead(d.stage)) },
+    { id: 'qualified', name: 'Qualified', color: 'bg-purple-500', deals: deals.filter(d => isQualified(d.stage)) },
+    { id: 'proposal', name: 'Proposal', color: 'bg-orange-500', deals: deals.filter(d => isProposal(d.stage)) },
+    { id: 'closed', name: 'Closed Won', color: 'bg-green-500', deals: deals.filter(d => isClosed(d.stage)) },
   ];
+
+  const BASE_WIN_RATE = 17;
+  const winRateDiff = winRate - BASE_WIN_RATE;
+  const winRateTrend = winRateDiff >= 0 ? "up" : "down";
+  const winRateChange = `${winRateDiff >= 0 ? "+" : ""}${winRateDiff.toFixed(1)}%`;
 
   // Métricas dinámicas para las cards
   const quickStats = [
     { 
       label: "Revenue Total", 
-      value: `$${(stats.totalRevenue / 1000).toFixed(0)}K`, 
+      value: `$${(totalRevenue / 1000).toFixed(0)}K`, 
       change: "+15.3%", 
       trend: "up", 
       icon: DollarSign,
@@ -119,7 +121,7 @@ export default function DashboardPage() {
     },
     { 
       label: "Deals Activos", 
-      value: stats.activeDeals.toString(), 
+      value: activeDeals.toString(), 
       change: "+8.2%", 
       trend: "up", 
       icon: Target,
@@ -127,7 +129,7 @@ export default function DashboardPage() {
     },
     { 
       label: "Clientes Activos", 
-      value: stats.activeClients.toString(), 
+      value: activeClients.toString(), 
       change: "+23.1%", 
       trend: "up", 
       icon: Users,
@@ -135,9 +137,9 @@ export default function DashboardPage() {
     },
     { 
       label: "Win Rate", 
-      value: `${stats.winRate}%`, 
-      change: stats.winRate >= 50 ? "+2.4%" : "-2.4%", 
-      trend: stats.winRate >= 50 ? "up" : "down", 
+      value: `${winRate}%`, 
+      change: winRateChange, 
+      trend: winRateTrend, 
       icon: TrendingUp,
       color: "text-orange-500"
     },

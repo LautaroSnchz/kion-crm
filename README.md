@@ -1,287 +1,204 @@
-# 🚀 KionCRM
+# KionCRM 🚀
 
-**Modern CRM built with React, TypeScript, and .NET**
+> **CRM moderno construido con React + TypeScript** — Gestión completa de clientes, proyectos y deals comerciales con dark/light mode, drag & drop y arquitectura escalable.
 
-A full-stack Customer Relationship Management system designed for small to medium-sized businesses. Built with modern technologies and best practices, featuring a clean UI, dark mode support, and real-time updates.
+[![Deploy](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://kion-crm.vercel.app)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://typescriptlang.org)
+[![Tailwind](https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
+
+---
+
+## 🌐 Demo en vivo
+
+**[https://kion-crm.vercel.app](https://kion-crm.vercel.app)**
+
+| Credenciales Admin | Credenciales Demo |
+|---|---|
+| `admin@kion.com` | `demo@kion.com` |
+| `admin123` | `demo123` |
+
+> El **modo demo** restringe creación, edición y eliminación de datos, mostrando feedback visual con tooltips y banners informativos.
 
 ---
 
 ## ✨ Features
 
-### 🎨 **Modern UI/UX**
-- Clean, professional interface with Teal/Cyan color palette
-- Full dark mode support with smooth transitions
-- Responsive design (desktop, tablet, mobile)
-- Loading skeletons for better perceived performance
-- Toast notifications for user feedback
+### 📊 Dashboard
+- Métricas en tiempo real: clientes totales, deals activos, revenue
+- Visualización con gráficos
+- Loading skeletons durante carga
 
-### 👥 **Client Management**
-- Complete client database with search and filtering
-- Client details with contact information
-- Activity tracking and deal history
-- Real-time client creation with validation
+### 👥 Gestión de Clientes
+- Tabla paginada con búsqueda en tiempo real (nombre, email, empresa)
+- Sidebar de detalle por cliente con **deals activos calculados dinámicamente**
+- CRUD completo: crear, editar y eliminar clientes
+- Badges de estado: Activo / Prospect / Inactivo
 
-### 📊 **Sales Pipeline**
-- Interactive Kanban board with drag & drop
-- 4-stage pipeline (Lead → Qualified → Proposal → Closed Won)
-- Deal cards with priority levels and value tracking
-- Alternative list view for quick overview
+### 📁 Gestión de Deals (Proyectos)
+- **Vista Kanban** con drag & drop entre columnas (Lead → Qualified → Proposal → Closed Won)
+- **Vista Lista** en tabla
+- Drag & drop funcional incluso en columnas vacías
+- Edición completa: título, cliente, valor, etapa, probabilidad (slider), fecha de cierre, notas
+- Clientes cargados dinámicamente desde localStorage
 
-### 📈 **Dashboard & Analytics**
-- Revenue overview with monthly tracking
-- Quick stats (Total Revenue, Active Deals, New Clients, Conversion Rate)
-- Top performers leaderboard
-- Recent activity feed
-- Sales pipeline visualization
+### 🌙 Dark / Light Mode
+- **ThemeContext** centralizado con Context API
+- Transiciones suaves en todos los elementos (0.28s ease)
+- Dropdowns (`select/option`) correctamente estilizados en ambos modos
+- CSS custom properties para colores en dark y light
 
-### 🔐 **Authentication & Roles**
-- Role-based access control (Admin & Demo modes)
-- Demo mode with read-only access
-- Protected routes and restricted actions
-- Persistent authentication with localStorage
+### 🔐 Autenticación y Roles
+- Roles: Admin y Demo
+- Rutas protegidas con React Router DOM v6
+- Demo Mode: acciones restringidas con feedback visual (tooltips, badges)
+- Persistencia de sesión en localStorage
 
-### 🎭 **Demo Mode**
-- Full exploration without data modification
-- Informative banners and tooltips
-- Disabled create/edit actions with helpful feedback
-- Drag & drop enabled for interaction
-
----
-
-## 🛠️ Tech Stack
-
-### **Frontend**
-- **React 18.3** - UI library
-- **TypeScript 5.6** - Type safety
-- **Vite 7.2** - Build tool & dev server
-- **Tailwind CSS 4.0** - Utility-first styling
-- **shadcn/ui** - Component library
-- **React Router 7.1** - Client-side routing
-- **Recharts** - Data visualization
-- **@dnd-kit** - Drag and drop functionality
-- **Sonner** - Toast notifications
-- **Lucide React** - Icon library
-
-### **Backend** *(In Development)*
-- **.NET 7/8** - Web API
-- **Entity Framework Core** - ORM
-- **SQL Server / PostgreSQL** - Database
-- **JWT** - Authentication
+### 🎨 UX & Interactividad
+- `cursor-pointer` en todos los elementos clicables
+- `cursor-text` en todos los inputs de escritura
+- Hover effects en filas y botones con transiciones suaves
+- Toast notifications con Sonner
+- Confirmación antes de eliminar (modal secundario)
+- Animaciones de entrada/salida en modals (zoom + fade)
 
 ---
 
-## 🚀 Getting Started
+## 🛠️ Stack Tecnológico
 
-### **Prerequisites**
-- Node.js 18+ and npm
-- Git
+### Core
+| Tecnología | Uso |
+|---|---|
+| React 18 | Biblioteca principal de UI |
+| TypeScript | Tipado estático en todo el proyecto |
+| Vite | Build tool y dev server |
+| React Router DOM v6 | Navegación SPA y rutas protegidas |
 
-### **Installation**
+### UI & Estilos
+| Tecnología | Uso |
+|---|---|
+| Tailwind CSS v4 | Utility-first styling |
+| shadcn/ui | Componentes accesibles (Dialog, Button, Input) |
+| Radix UI | Primitivos accesibles |
+| lucide-react | Iconografía SVG |
+| tw-animate-css | Animaciones declarativas |
+| class-variance-authority | Variantes de componentes |
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/LautaroSnchz/kion-crm.git
-   cd kion-crm
-   ```
+### Estado & Datos
+| Tecnología | Uso |
+|---|---|
+| TanStack Query | Server state y caché |
+| Context API | Estado global del tema (ThemeContext) |
+| localStorage | Persistencia de datos en cliente |
+| Custom Hooks | useClients, useDeals, useAuth, useTheme |
 
-2. **Install frontend dependencies**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-3. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   ```
-   http://localhost:5173
-   ```
-
----
-
-## 🎭 Demo Credentials
-
-### **Admin Access**
-- Email: `admin@kioncrm.com`
-- Password: `Admin123!`
-
-### **Demo Mode**
-- Click "Acceder como Demo" button
-- Read-only access with full exploration
+### Notificaciones
+| Tecnología | Uso |
+|---|---|
+| Sonner | Toast notifications con soporte dark/light |
 
 ---
 
-## 📸 Screenshots
-
-### Dashboard (Light Mode)
-![Dashboard Light](docs/screenshots/dashboard-lightmode.png)
-*Revenue overview, quick stats, and top performers*
-
-### Dashboard (Dark Mode)
-![Dashboard Dark](docs/screenshots/dashboard-darkmode.png)
-*Full dark mode support with adaptive colors*
-
-### Clients Management
-![Clients Page](docs/screenshots/clientes-tabla.png)
-*Client database with search and filtering*
-
-### Sales Pipeline (Kanban)
-![Projects Kanban](docs/screenshots/proyectos-kanban.png)
-*Interactive drag & drop deal management*
-
----
-
-## 🗂️ Project Structure
+## 🏗️ Arquitectura
 
 ```
-kion-crm/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── layout/          # AppLayout, Sidebar, Topbar
-│   │   │   ├── modals/          # NewClientModal, NewDealModal
-│   │   │   └── ui/              # shadcn components + Skeletons
-│   │   ├── features/
-│   │   │   ├── auth/            # SignIn page
-│   │   │   ├── clients/         # ClientsPage
-│   │   │   ├── dashboard/       # DashboardPage
-│   │   │   └── projects/        # ProjectsPage (Pipeline)
-│   │   ├── hooks/               # useAuth custom hook
-│   │   ├── types/               # TypeScript definitions
-│   │   └── index.css            # Global styles + theme
-│   ├── public/                  # Static assets
-│   └── package.json
-├── backend/                     # (Coming soon)
-└── docs/
+src/
+├── components/
+│   ├── layout/           # AppLayout, Sidebar, Topbar
+│   ├── modals/           # NewDealModal, DealModal, ClientModal, NewClientModal
+│   └── ui/               # Componentes shadcn
+├── contexts/
+│   └── ThemeContext.tsx  # Estado global del tema (Context API)
+├── features/
+│   ├── auth/             # SignIn
+│   ├── clients/          # ClientsPage
+│   ├── dashboard/        # DashboardPage
+│   └── projects/         # ProjectsPage (Kanban + Lista)
+├── hooks/
+│   ├── useAuth.ts        # Autenticación
+│   ├── useClients.ts     # CRUD clientes
+│   ├── useDeals.ts       # CRUD deals
+│   └── useTheme.ts       # Acceso al ThemeContext
+├── lib/
+│   ├── providers.tsx     # ThemeProvider + QueryClientProvider
+│   ├── storage.ts        # Tipos y datos iniciales
+│   └── utils.ts          # Utilidades
+└── types/
+    └── theme.types.ts    # Interfaces del sistema de temas
+```
+
+### Patrones de Diseño Implementados
+- **Context API Pattern** — ThemeContext para estado global del tema
+- **Custom Hooks Pattern** — Lógica de negocio encapsulada y reutilizable
+- **Feature-Based Structure** — Organización por dominio funcional
+- **Protected Routes** — Validación de autenticación en navegación
+- **Compound Components** — Composición con shadcn/ui
+
+---
+
+## 🎨 Sistema de Diseño
+
+### Paleta de Colores
+
+| Token | Light Mode | Dark Mode |
+|---|---|---|
+| `--primary` | `#06B6D4` (Cyan) | `#22D3EE` |
+| `--background` | `#FAFAFA` | `#12121A` |
+| `--card` | `#FFFFFF` | `#1A1A22` |
+| `--foreground` | `#0F0F0F` | `#F5F5F5` |
+| `--border` | `#E2E2E2` | `rgba(255,255,255,0.10)` |
+
+---
+
+## 🚀 Instalación y Desarrollo
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/LautaroSnchz/KionCRM.git
+cd KionCRM/frontend
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+
+# Build para producción
+npm run build
 ```
 
 ---
 
-## 🎨 Color Palette
+## 📦 Variables de Entorno
 
-**Primary (Teal/Cyan):**
-- Light mode: `#06B6D4` (Cyan 500)
-- Dark mode: `#22D3EE` (Cyan 400)
-
-**Why Teal?**
-Changed from purple to differentiate from AI-generated aesthetics and better suit a professional CRM context.
+No se requieren variables de entorno para desarrollo local. El proyecto usa localStorage para persistencia de datos.
 
 ---
 
-## ✅ Completed Features
+## 🗺️ Roadmap
 
-- [x] Authentication system with roles
-- [x] Client management (CRUD)
-- [x] Deal/Project pipeline with Kanban
-- [x] Dashboard with analytics
-- [x] Dark/Light mode toggle
-- [x] Demo mode with restrictions
-- [x] Loading skeletons
-- [x] Toast notifications
-- [x] Form validations
-- [x] Responsive design
-- [x] Modal dialogs
-- [x] Drag & drop
+- [ ] Backend con Node.js + Express o Next.js API Routes
+- [ ] Base de datos PostgreSQL o MongoDB
+- [ ] Autenticación con JWT + refresh tokens
+- [ ] Notificaciones en tiempo real con WebSockets
+- [ ] Dashboard con gráficos avanzados (Recharts)
+- [ ] Filtros avanzados en tablas
+- [ ] Exportación a CSV/Excel
+- [ ] Tests unitarios con Vitest
+- [ ] Tests E2E con Playwright
 
 ---
 
-## 🚧 Roadmap
+## 👤 Autor
 
-### **Phase 1: Frontend (98% Complete)** ✅
-- [x] Core UI components
-- [x] Authentication & routing
-- [x] Client management
-- [x] Sales pipeline
-- [x] Dashboard & analytics
-- [x] Demo mode
-- [x] Loading states
-- [ ] Empty states
-- [ ] Error boundaries
+**Lautaro Sanchez**
 
-### **Phase 2: Backend (In Progress)**
-- [ ] .NET Web API setup
-- [ ] Database design (EF Core)
-- [ ] JWT authentication
-- [ ] CRUD endpoints
-- [ ] Data validation
-- [ ] API documentation
-
-### **Phase 3: Integration**
-- [ ] Connect frontend to API
-- [ ] Real-time updates
-- [ ] File uploads
-- [ ] Export functionality
-- [ ] Email notifications
-
-### **Phase 4: Deployment**
-- [x] Frontend on Vercel
-- [ ] Backend on Azure/Railway
-- [ ] Database in cloud
-- [ ] CI/CD pipeline
-- [ ] Monitoring & logging
-
-### **Phase 5: Advanced Features**
-- [ ] Advanced analytics
-- [ ] Custom reports
-- [ ] Email integration
-- [ ] Calendar sync
-- [ ] Mobile app
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-06B6D4)](https://portfolio-woad-nine-22.vercel.app)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?logo=linkedin)](https://linkedin.com/in/lautarosnchz)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?logo=github)](https://github.com/LautaroSnchz)
 
 ---
 
-## 🤝 Contributing
+## 📄 Licencia
 
-This is a portfolio project, but feedback and suggestions are welcome!
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-## 👨‍💻 Author
-
-**Lautaro Sánchez**
-
-- GitHub: [@LautaroSnchz](https://github.com/LautaroSnchz)
-- LinkedIn: [Add your LinkedIn]
-- Email: [Add your email]
-
----
-
-## 🙏 Acknowledgments
-
-- [shadcn/ui](https://ui.shadcn.com/) - Component library
-- [Tailwind CSS](https://tailwindcss.com/) - Styling framework
-- [Recharts](https://recharts.org/) - Chart library
-- [dnd-kit](https://dndkit.com/) - Drag and drop
-- [Lucide](https://lucide.dev/) - Icon library
-
----
-
-## 📊 Project Stats
-
-- **Frontend Completion:** 98%
-- **Total Lines of Code:** ~15,000+
-- **Components:** 25+
-- **Pages:** 4 (Dashboard, Clients, Projects, SignIn)
-- **Development Time:** 3 weeks
-
----
-
-**⭐ If you found this project helpful, please consider giving it a star!**
-
----
-
-*Built with ❤️ using React, TypeScript, and modern web technologies*
+MIT © 2026 Lautaro Sanchez

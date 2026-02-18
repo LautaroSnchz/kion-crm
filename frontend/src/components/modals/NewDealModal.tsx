@@ -17,20 +17,22 @@ const PRIORITIES = ["Alta", "Media", "Baja"];
 const ASSIGNEES = [
   { id: "SB", name: "Simon Belmont" },
   { id: "SM", name: "Sofía Márquez" },
-  { id: "OC", name: "Orion Castillo" }
+  { id: "OC", name: "Orion Castillo" },
+  { id: "VR", name: "Valentina Ríos" },
+  { id: "EM", name: "Emilio Mendoza" },
+  { id: "LT", name: "Lucía Torres" }
 ];
 const STAGES = ["Lead", "Qualified", "Proposal", "Closed Won"];
 
 export default function NewDealModal({ open, onClose, onDealCreated }: NewDealModalProps) {
   const { isDark } = useTheme();
-console.log('NewDealModal isDark:', isDark);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     client: "",
     title: "",
     value: "",
     priority: "Media",
-    assignee: "MG",
+    assignee: "SB",
     deadline: "",
     stage: "Lead"
   });
@@ -99,7 +101,7 @@ console.log('NewDealModal isDark:', isDark);
         title: "",
         value: "",
         priority: "Media",
-        assignee: "MG",
+        assignee: "SB",
         deadline: "",
         stage: "Lead"
       });

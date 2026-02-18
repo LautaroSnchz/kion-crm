@@ -145,7 +145,7 @@ const INITIAL_DEALS: Deal[] = [
     probability: 75,
     expectedCloseDate: '2026-04-22',
     createdAt: '2026-01-10',
-    owner: 'Mike Johnson'
+    owner: 'Simon Belmont'
   },
   {
     id: '2',
@@ -156,7 +156,7 @@ const INITIAL_DEALS: Deal[] = [
     probability: 20,
     expectedCloseDate: '2026-04-10',
     createdAt: '2026-01-12',
-    owner: 'Orion Castillo'
+    owner: 'Sofía Márquez'
   },
   {
     id: '3',
@@ -167,7 +167,7 @@ const INITIAL_DEALS: Deal[] = [
     probability: 60,
     expectedCloseDate: '2026-05-15',
     createdAt: '2026-01-18',
-    owner: 'John Davis'
+    owner: 'Orion Castillo'
   },
   {
     id: '4',
@@ -178,7 +178,7 @@ const INITIAL_DEALS: Deal[] = [
     probability: 50,
     expectedCloseDate: '2026-05-30',
     createdAt: '2026-01-05',
-    owner: 'Orion Castillo'
+    owner: 'Valentina Ríos'
   },
   {
     id: '5',
@@ -189,7 +189,7 @@ const INITIAL_DEALS: Deal[] = [
     probability: 40,
     expectedCloseDate: '2026-06-12',
     createdAt: '2026-01-08',
-    owner: 'Mike Johnson'
+    owner: 'Emilio Mendoza'
   },
   {
     id: '6',
@@ -200,7 +200,7 @@ const INITIAL_DEALS: Deal[] = [
     probability: 100,
     expectedCloseDate: '2026-01-19',
     createdAt: '2026-01-19',
-    owner: 'John Davis'
+    owner: 'Lucía Torres'
   }
 ];
 

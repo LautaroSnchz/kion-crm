@@ -146,10 +146,10 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6 bg-[var(--background)] min-h-screen">
+    <div className="p-4 md:p-6 space-y-6 bg-[var(--background)] min-h-screen">
       
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold text-[var(--foreground)]">Dashboard</h1>
           <p className="text-[var(--muted-foreground)] mt-1">
@@ -175,13 +175,13 @@ export default function DashboardPage() {
 
       {/* Quick Stats DINÁMICAS */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <MetricCardSkeleton key={i} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {quickStats.map((stat) => (
             <Card key={stat.label} className="p-5 hover:shadow-lg transition-all cursor-pointer group">
               <div className="flex items-start justify-between">

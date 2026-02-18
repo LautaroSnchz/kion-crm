@@ -244,11 +244,11 @@ className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed br
               <thead className="bg-[var(--muted)] border-b border-[var(--border)]">
                 <tr>
                   <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Cliente</th>
-                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Empresa</th>
+                  <th className="hidden sm:table-cell p-4 text-left text-sm font-semibold text-[var(--foreground)]">Empresa</th>
                   <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Estado</th>
-                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Deals</th>
+                  <th className="hidden md:table-cell p-4 text-left text-sm font-semibold text-[var(--foreground)]">Deals</th>
                   <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Valor</th>
-                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Último contacto</th>
+                  <th className="hidden lg:table-cell p-4 text-left text-sm font-semibold text-[var(--foreground)]">Último contacto</th>
                 </tr>
               </thead>
               <tbody>
@@ -283,7 +283,7 @@ className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed br
                           </div>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="hidden sm:table-cell p-4">
                         <div className="flex items-center gap-2">
                           <Building className="w-4 h-4 text-[var(--muted-foreground)]" />
                           <span className="text-sm text-[var(--foreground)]">{client.company}</span>
@@ -297,7 +297,7 @@ className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed br
                         {client.status === "active" ? "Activo" : client.status === "prospect" ? "Prospect" : "Inactivo"}
                         </Badge>
                       </td>
-                      <td className="p-4">
+                      <td className="hidden md:table-cell p-4">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-[var(--foreground)]">
                       {deals.filter(d => d.client === client.name && d.stage !== 'closed').length}
@@ -310,7 +310,7 @@ className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed br
                           ${client.value.toLocaleString()}
                         </span>
                       </td>
-                      <td className="p-4">
+                      <td className="hidden lg:table-cell p-4">
                         <span className="text-sm text-[var(--muted-foreground)]">
                           {client.lastContact}
                         </span>

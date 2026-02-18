@@ -300,14 +300,14 @@ className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed br
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-[var(--foreground)]">
-                      {deals.filter(d => d.client === client.name && d.stage !== 'closed' && d.stage !== 'Closed Won').length}
+                      {deals.filter(d => d.client === client.name && d.stage !== 'closed').length}
                       </span>
                           <span className="text-xs text-[var(--muted-foreground)]">deals</span>
                         </div>
                       </td>
                       <td className="p-4">
                         <span className="font-semibold text-[var(--foreground)]">
-                          ${deals.filter(d => d.client === client.name).reduce((sum, d) => sum + (d.value || 0), 0).toLocaleString()}
+                          ${client.value.toLocaleString()}
                         </span>
                       </td>
                       <td className="p-4">

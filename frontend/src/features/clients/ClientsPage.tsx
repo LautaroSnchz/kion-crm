@@ -235,92 +235,135 @@ className={`flex items-center gap-2 ${isDemo ? 'opacity-60 cursor-not-allowed br
           )
         )}
 
-        {/* Tabla CON SKELETON */}
+        {/* Vista mobile: cards / Vista desktop: tabla */}
         {loading ? (
           <TableSkeleton rows={5} columns={6} />
         ) : (
-          <div className="border border-[var(--border)] rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-[var(--muted)] border-b border-[var(--border)]">
-                <tr>
-                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Cliente</th>
-                  <th className="hidden sm:table-cell p-4 text-left text-sm font-semibold text-[var(--foreground)]">Empresa</th>
-                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Estado</th>
-                  <th className="hidden md:table-cell p-4 text-left text-sm font-semibold text-[var(--foreground)]">Deals</th>
-                  <th className="p-4 text-left text-sm font-semibold text-[var(--foreground)]">Valor</th>
-                  <th className="hidden lg:table-cell p-4 text-left text-sm font-semibold text-[var(--foreground)]">Último contacto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedData.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-12 text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <Search className="w-12 h-12 text-[var(--muted-foreground)] opacity-50" />
-                        <p className="text-[var(--muted-foreground)]">
-                          No se encontraron clientes
-                        </p>
+          <>
+            {/* MOBILE: Cards */}
+            <div className="sm:hidden space-y-3">
+              {paginatedData.length === 0 ? (
+                <div className="p-12 text-center flex flex-col items-center gap-3">
+                  <Search className="w-12 h-12 text-[var(--muted-foreground)] opacity-50" />
+                  <p className="text-[var(--muted-foreground)]">No se encontraron clientes</p>
+                </div>
+              ) : (
+                paginatedData.map((client) => (
+                  <div
+                    key={client.id}
+                    onClick={() => setSelectedClient(client)}
+                    className="border border-[var(--border)] rounded-lg p-4 cursor-pointer hover:bg-[var(--muted)]/50 transition-all"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                          {client.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-medium text-[var(--foreground)]">{client.name}</p>
+                          <p className="text-xs text-[var(--muted-foreground)]">{client.email}</p>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedData.map((client) => (
-                    <tr
-                      key={client.id}
-                      onClick={() => setSelectedClient(client)}
-                      className="border-t border-[var(--border)] kion-row-hover transition-all cursor-pointer group"
-                    >
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                            {client.name.charAt(0)}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors truncate">
-                              {client.name}
-                            </p>
-                            <p className="text-sm text-[var(--muted-foreground)] truncate">{client.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="hidden sm:table-cell p-4">
-                        <div className="flex items-center gap-2">
-                          <Building className="w-4 h-4 text-[var(--muted-foreground)]" />
-                          <span className="text-sm text-[var(--foreground)]">{client.company}</span>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <Badge 
-                          variant={client.status === "active" ? "success" : client.status === "prospect" ? "warning" : "default"}
-                          isDark={isDark}
-                        >
+                      <Badge
+                        variant={client.status === "active" ? "success" : client.status === "prospect" ? "warning" : "default"}
+                        isDark={isDark}
+                      >
                         {client.status === "active" ? "Activo" : client.status === "prospect" ? "Prospect" : "Inactivo"}
-                        </Badge>
-                      </td>
-                      <td className="hidden md:table-cell p-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-[var(--foreground)]">
-                      {deals.filter(d => d.client === client.name && d.stage !== 'closed').length}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-[var(--muted-foreground)]">{client.company}</span>
+                      <span className="font-semibold text-[var(--foreground)]">
+                        ${deals.filter(d => d.client === client.name).reduce((sum, d) => sum + (d.value || 0), 0).toLocaleString()}
                       </span>
-                          <span className="text-xs text-[var(--muted-foreground)]">deals</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* DESKTOP: Tabla */}
+            <div className="hidden sm:block border border-[var(--border)] rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-[var(--muted)] border-b border-[var(--border)]">
+                  <tr>
+                    <th className="p-3 text-left text-sm font-semibold text-[var(--foreground)]">Cliente</th>
+                    <th className="hidden md:table-cell p-3 text-left text-sm font-semibold text-[var(--foreground)]">Empresa</th>
+                    <th className="p-3 text-left text-sm font-semibold text-[var(--foreground)]">Estado</th>
+                    <th className="hidden lg:table-cell p-3 text-left text-sm font-semibold text-[var(--foreground)]">Deals</th>
+                    <th className="p-3 text-left text-sm font-semibold text-[var(--foreground)]">Valor</th>
+                    <th className="hidden xl:table-cell p-3 text-left text-sm font-semibold text-[var(--foreground)]">Último contacto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedData.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-12 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <Search className="w-12 h-12 text-[var(--muted-foreground)] opacity-50" />
+                          <p className="text-[var(--muted-foreground)]">No se encontraron clientes</p>
                         </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="font-semibold text-[var(--foreground)]">
-                          ${client.value.toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="hidden lg:table-cell p-4">
-                        <span className="text-sm text-[var(--muted-foreground)]">
-                          {client.lastContact}
-                        </span>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    paginatedData.map((client) => (
+                      <tr
+                        key={client.id}
+                        onClick={() => setSelectedClient(client)}
+                        className="border-t border-[var(--border)] kion-row-hover transition-all cursor-pointer group"
+                      >
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                              {client.name.charAt(0)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors truncate">
+                                {client.name}
+                              </p>
+                              <p className="text-xs text-[var(--muted-foreground)] truncate">{client.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="hidden md:table-cell p-3">
+                          <div className="flex items-center gap-2">
+                            <Building className="w-4 h-4 text-[var(--muted-foreground)]" />
+                            <span className="text-sm text-[var(--foreground)]">{client.company}</span>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <Badge
+                            variant={client.status === "active" ? "success" : client.status === "prospect" ? "warning" : "default"}
+                            isDark={isDark}
+                          >
+                            {client.status === "active" ? "Activo" : client.status === "prospect" ? "Prospect" : "Inactivo"}
+                          </Badge>
+                        </td>
+                        <td className="hidden lg:table-cell p-3">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-[var(--foreground)]">
+                              {deals.filter(d => d.client === client.name && d.stage !== 'closed').length}
+                            </span>
+                            <span className="text-xs text-[var(--muted-foreground)]">deals</span>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <span className="font-semibold text-[var(--foreground)]">
+                            ${deals.filter(d => d.client === client.name).reduce((sum, d) => sum + (d.value || 0), 0).toLocaleString()}
+                          </span>
+                        </td>
+                        <td className="hidden xl:table-cell p-3">
+                          <span className="text-sm text-[var(--muted-foreground)]">
+                            {client.lastContact}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* Paginación */}

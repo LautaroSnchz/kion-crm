@@ -93,7 +93,6 @@ export default function NewDealModal({ open, onClose, onDealCreated }: NewDealMo
       };
 
       onDealCreated(newDeal);
-      toast.success(`Deal "${formData.title}" creado exitosamente`);
       
       // Reset form
       setFormData({

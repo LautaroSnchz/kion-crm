@@ -69,7 +69,6 @@ export default function NewClientModal({ open, onClose, onClientCreated }: NewCl
       };
 
       onClientCreated(newClient);
-      toast.success(`Cliente "${formData.name}" creado exitosamente`);
       
       // Reset form
       setFormData({
